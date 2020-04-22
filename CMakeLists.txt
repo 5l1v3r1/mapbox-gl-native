@@ -15,6 +15,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+if(NOT EXISTS ${PROJECT_SOURCE_DIR}/internal/internal.cmake)
+    set(MBGL_PUBLIC_BUILD TRUE)
+endif()
+
 option(MBGL_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MBGL_WITH_COVERAGE "Enable code coverage collection" OFF)
 option(MBGL_WITH_QT "Build Mapbox GL Qt bindings" OFF)
@@ -1025,10 +1029,6 @@ if(MBGL_WITH_CORE_ONLY)
 endif()
 
 include(${PROJECT_SOURCE_DIR}/scripts/license.cmake)
-
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/internal/internal.cmake)
-    set(MBGL_PUBLIC_BUILD TRUE)
-endif()
 
 if(MBGL_WITH_QT)
     include(${PROJECT_SOURCE_DIR}/platform/qt/qt.cmake)
