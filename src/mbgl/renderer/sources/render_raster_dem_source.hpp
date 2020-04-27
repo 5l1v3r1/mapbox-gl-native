@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/sources/render_tile_source.hpp>
-#include <mbgl/style/sources/raster_source_impl.hpp>
+#include <mbgl/style/sources/raster_dem_source_impl.hpp>
 
 namespace mbgl {
 

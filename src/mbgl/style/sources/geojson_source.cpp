@@ -61,6 +61,24 @@ void GeoJSONSource::setGeoJSONData(std::shared_ptr<GeoJSONData> geoJSONData) {
     observer->onSourceChanged(*this);
 }
 
+void GeoJSONSource::setSourceData(SourceData data) {
+    if (data.url) {
+        setURL(*data.url);
+    } else if (data.geoJSON) {
+        setGeoJSON(*data.geoJSON);
+    } else if (data.geoJSONData) {
+        setGeoJSONData(std::move(data.geoJSONData));
+    }
+}
+
+SourceDataResult GeoJSONSource::getSourceData() const {
+    SourceDataResult result{impl().getData()};
+    if (url) {
+        result.url = &*url;
+    }
+    return result;
+}
+
 optional<std::string> GeoJSONSource::getURL() const {
     return url;
 }
@@ -81,13 +99,11 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
 
     req = fileSource.request(Resource::source(*url), [this](const Response& res) {
         if (res.error) {
-            observer->onSourceError(
-                *this, std::make_exception_ptr(std::runtime_error(res.error->message)));
+            observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
             return;
         } else if (res.noContent) {
-            observer->onSourceError(
-                *this, std::make_exception_ptr(std::runtime_error("unexpectedly empty GeoJSON")));
+            observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error("unexpectedly empty GeoJSON")));
         } else {
             auto makeImplInBackground = [currentImpl = baseImpl, data = res.data]() -> Immutable<Source::Impl> {
                 assert(data);
@@ -117,11 +133,22 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
 }
 
 bool GeoJSONSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(info->tileKind);
+    return mbgl::underlying_type(TileKind::Geometry) == mbgl::underlying_type(info->tileKind);
 }
 
 Mutable<Source::Impl> GeoJSONSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
+}
+
+Value GeoJSONSource::serialize() const {
+    auto value = Source::serialize();
+    assert(value.getObject());
+
+    if (url.has_value()) {
+        value.getObject()->insert({"data", url.value()});
+    }
+
+    return value;
 }
 
 } // namespace style

@@ -138,15 +138,6 @@ std::vector<UnwrappedTileID> tileCover(const Point<double>& tl,
 
 } // namespace
 
-int32_t coveringZoomLevel(double zoom, style::SourceType type, uint16_t size) {
-    zoom += util::log2(util::tileSize / size);
-    if (type == style::SourceType::Raster || type == style::SourceType::Video) {
-        return ::round(zoom);
-    } else {
-        return std::floor(zoom);
-    }
-}
-
 std::vector<OverscaledTileID> tileCover(const TransformState& state, uint8_t z, const optional<uint8_t>& overscaledZ) {
     struct Node {
         AABB aabb;

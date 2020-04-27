@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/sources/vector_source.hpp>
 #include <mbgl/style/source_impl.hpp>
+#include <mbgl/style/sources/vector_source.hpp>
 
 namespace mbgl {
 namespace style {
@@ -14,6 +14,8 @@ public:
     optional<std::string> getAttribution() const final;
 
     const optional<Tileset> tileset;
+
+    DECLARE_SOURCE_TYPE_INFO;
 };
 
 } // namespace style

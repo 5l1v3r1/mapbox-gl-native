@@ -61,7 +61,7 @@ struct LayerTypeInfo {
 
     /**
      * @brief contains the Id of the supported tile type. Used for internal checks.
-     * The contained values correspond to \c Tile::Kind enum.
+     * The contained values correspond to \c TileKind enum.
      */
     const enum class TileKind : uint8_t { Geometry, Raster, RasterDEM, NotRequired } tileKind;
 };

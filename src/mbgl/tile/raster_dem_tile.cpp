@@ -14,15 +14,11 @@
 
 namespace mbgl {
 
-RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_,
-                       const TileParameters& parameters,
-                       const Tileset& tileset)
-    : Tile(Kind::RasterDEM, id_),
+RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset)
+    : Tile(TileKind::RasterDEM, id_),
       loader(*this, id_, parameters, tileset),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(Scheduler::GetBackground(),
-             ActorRef<RasterDEMTile>(*this, mailbox)) {
-
+      worker(Scheduler::GetBackground(), ActorRef<RasterDEMTile>(*this, mailbox)) {
     encoding = tileset.encoding;
     if ( id.canonical.y == 0 ){
         // this tile doesn't have upper neighboring tiles so marked those as backfilled

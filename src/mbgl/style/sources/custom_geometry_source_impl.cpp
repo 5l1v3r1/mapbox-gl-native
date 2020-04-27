@@ -5,7 +5,7 @@ namespace mbgl {
 namespace style {
 
 CustomGeometrySource::Impl::Impl(std::string id_, const CustomGeometrySource::Options& options)
-    : Source::Impl(SourceType::CustomVector, std::move(id_)),
+    : Source::Impl(std::move(id_)),
       tileOptions(makeMutable<CustomGeometrySource::TileOptions>(options.tileOptions)),
       zoomRange(options.zoomRange),
       loaderRef({}) {}
@@ -31,6 +31,11 @@ Range<uint8_t> CustomGeometrySource::Impl::getZoomRange() const {
 
 optional<ActorRef<CustomTileLoader>> CustomGeometrySource::Impl::getTileLoader() const {
     return loaderRef;
+}
+
+const SourceTypeInfo* CustomGeometrySource::Impl::staticTypeInfo() noexcept {
+    const static SourceTypeInfo typeInfo{"customvector", true, nullopt};
+    return &typeInfo;
 }
 
 } // namespace style

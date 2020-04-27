@@ -16,7 +16,7 @@ public:
                  optional<float> minZoom = nullopt);
     ~VectorSource() final;
 
-    const variant<std::string, Tileset>& getURLOrTileset() const;
+    const variant<std::string, Tileset>* getURLOrTileset() const final;
     optional<std::string> getURL() const;
 
     class Impl;
@@ -30,6 +30,8 @@ public:
         return weakFactory.makeWeakPtr();
     }
 
+    Value serialize() const override;
+
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
@@ -40,11 +42,6 @@ private:
     optional<float> maxZoom;
     optional<float> minZoom;
 };
-
-template <>
-inline bool Source::is<VectorSource>() const {
-    return getType() == SourceType::Vector;
-}
 
 } // namespace style
 } // namespace mbgl

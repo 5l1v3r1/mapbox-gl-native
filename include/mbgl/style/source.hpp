@@ -1,19 +1,23 @@
 #pragma once
 
-#include <mbgl/style/types.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/immutable.hpp>
-#include <mbgl/util/optional.hpp>
-
 #include <mapbox/std/weak.hpp>
 #include <mapbox/util/type_wrapper.hpp>
-
+#include <mbgl/style/source_data.hpp>
+#include <mbgl/style/source_parameters.hpp>
+#include <mbgl/style/types.hpp>
+#include <mbgl/tile/tile_kind.hpp>
+#include <mbgl/util/chrono.hpp>
+#include <mbgl/util/feature.hpp>
+#include <mbgl/util/immutable.hpp>
+#include <mbgl/util/optional.hpp>
+#include <mbgl/util/variant.hpp>
 #include <memory>
 #include <string>
 
 namespace mbgl {
 
 class FileSource;
+class Tileset;
 
 namespace style {
 
@@ -23,6 +27,27 @@ class RasterDEMSource;
 class GeoJSONSource;
 class SourceObserver;
 struct LayerTypeInfo;
+
+/**
+ * @brief Holds static data for a certain source type.
+ */
+struct SourceTypeInfo {
+    /**
+     * @brief contains the source type as defined in the style specification;
+     */
+    const char* type;
+
+    /**
+     * @brief specifies whether the source supports tile prefetching;
+     */
+    const bool supportsTilePrefetch;
+
+    /**
+     * @brief specifies source's tile kind;
+     *
+     */
+    const optional<TileKind> tileKind;
+};
 
 /**
  * The runtime representation of a [source](https://www.mapbox.com/mapbox-gl-style-spec/#sources) from the Mapbox Style
@@ -47,22 +72,6 @@ public:
 
     virtual ~Source();
 
-    // Check whether this source is of the given subtype.
-    template <class T>
-    bool is() const;
-
-    // Dynamically cast this source to the given subtype.
-    template <class T>
-    T* as() {
-        return is<T>() ? reinterpret_cast<T*>(this) : nullptr;
-    }
-
-    template <class T>
-    const T* as() const {
-        return is<T>() ? reinterpret_cast<const T*>(this) : nullptr;
-    }
-
-    SourceType getType() const;
     std::string getID() const;
     optional<std::string> getAttribution() const;
 
@@ -78,8 +87,24 @@ public:
     SourceObserver* observer = nullptr;
 
     virtual void loadDescription(FileSource&) = 0;
+
+    virtual void setSourceData(SourceData){};
+
+    virtual SourceDataResult getSourceData() const { return {}; }
+
+    virtual const variant<std::string, Tileset>* getURLOrTileset() const { return nullptr; }
+
+    virtual void setSourceParameters(SourceParameters){};
+
+    virtual void invalidateTile(const CanonicalTileID&) {}
+    virtual void invalidateRegion(const LatLngBounds&) {}
+
     void setPrefetchZoomDelta(optional<uint8_t> delta) noexcept;
     optional<uint8_t> getPrefetchZoomDelta() const noexcept;
+
+    int32_t getCoveringZoomLevel(double z) const noexcept;
+
+    uint16_t getTileSize() const;
 
     // If the given source supports loading tiles from a server,
     // sets the minimum tile update interval.
@@ -103,6 +128,7 @@ public:
     // parent tile may be used.
     void setMaxOverscaleFactorForParentTiles(optional<uint8_t> overscaleFactor) noexcept;
     optional<uint8_t> getMaxOverscaleFactorForParentTiles() const noexcept;
+
     void dumpDebugLogs() const;
 
     virtual bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const = 0;
@@ -116,8 +142,16 @@ public:
 
     virtual mapbox::base::WeakPtr<Source> makeWeakPtr() = 0;
 
+    const SourceTypeInfo* getTypeInfo() const noexcept;
+
+    virtual Value serialize() const;
+
 protected:
     explicit Source(Immutable<Impl>);
+
+    void serializeUrlOrTileSet(Value&, const variant<std::string, Tileset>*) const;
+    void serializeTileSet(Value&, const mbgl::Tileset&) const;
+
     virtual Mutable<Impl> createMutable() const noexcept = 0;
 };
 

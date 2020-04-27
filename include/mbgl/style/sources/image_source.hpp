@@ -16,9 +16,11 @@ public:
     ~ImageSource() override;
 
     optional<std::string> getURL() const;
-    void setURL(const std::string& url);
 
+    void setURL(const std::string& url);
     void setImage(PremultipliedImage&&);
+    void setSourceData(SourceData) override;
+    SourceDataResult getSourceData() const override;
 
     void setCoordinates(const std::array<LatLng, 4>&);
     std::array<LatLng, 4> getCoordinates() const;
@@ -30,9 +32,9 @@ public:
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override {
-        return weakFactory.makeWeakPtr();
-    }
+    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+
+    Value serialize() const override;
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
@@ -40,13 +42,8 @@ protected:
 private:
     optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
-    mapbox::base::WeakPtrFactory<Source> weakFactory {this};
+    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
 };
-
-template <>
-inline bool Source::is<ImageSource>() const {
-    return getType() == SourceType::Image;
-}
 
 } // namespace style
 } // namespace mbgl

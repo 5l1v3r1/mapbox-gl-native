@@ -50,6 +50,28 @@ void ImageSource::setImage(PremultipliedImage&& image_) {
     observer->onSourceChanged(*this);
 }
 
+void ImageSource::setSourceData(SourceData data) {
+    if (data.url) {
+        setURL(*data.url);
+    } else if (data.image) {
+        setImage(std::move(*data.image));
+    }
+}
+
+SourceDataResult ImageSource::getSourceData() const {
+    SourceDataResult result{};
+    if (url) {
+        result.url = &*url;
+    }
+
+    auto image = impl().getImage();
+    if (image) {
+        result.image = image;
+    }
+
+    return result;
+}
+
 optional<std::string> ImageSource::getURL() const {
     return url;
 }
@@ -84,11 +106,30 @@ void ImageSource::loadDescription(FileSource& fileSource) {
 }
 
 bool ImageSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(info->tileKind);
+    return mbgl::underlying_type(TileKind::Raster) == mbgl::underlying_type(info->tileKind);
 }
 
 Mutable<Source::Impl> ImageSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
+}
+
+Value ImageSource::serialize() const {
+    auto value = Source::serialize();
+    assert(value.getObject());
+    auto object = value.getObject();
+
+    if (url) object->insert({"url", url.value()});
+
+    const auto source_coordinates = getCoordinates();
+    std::vector<mapbox::base::Value> coordinates;
+    coordinates.reserve(source_coordinates.size());
+
+    for (const auto& c : source_coordinates) {
+        coordinates.emplace_back(std::vector<mapbox::base::Value>{c.longitude(), c.latitude()});
+    }
+    object->insert({"coordinates", coordinates});
+
+    return value;
 }
 
 } // namespace style

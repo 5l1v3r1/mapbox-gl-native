@@ -20,6 +20,8 @@ public:
     optional<ActorRef<CustomTileLoader>> getTileLoader() const;
     bool operator!=(const Impl&) const noexcept;
 
+    DECLARE_SOURCE_TYPE_INFO;
+
 private:
     Immutable<CustomGeometrySource::TileOptions> tileOptions;
     Range<uint8_t> zoomRange;

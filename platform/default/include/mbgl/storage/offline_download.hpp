@@ -19,6 +19,7 @@ class Tileset;
 
 namespace style {
 class Parser;
+class Source;
 } // namespace style
 
 /**
@@ -65,7 +66,7 @@ private:
     std::list<std::tuple<Resource, Response>> buffer;
 
     void queueResource(Resource&&);
-    void queueTiles(style::SourceType, uint16_t tileSize, const Tileset&);
+    void queueTiles(const style::Source&, const Tileset&);
     void markPendingUsedResources();
 };
 

@@ -1,3 +1,4 @@
+#include <mbgl/math/log2.hpp>
 #include <mbgl/style/source_impl.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/logging.hpp>
@@ -14,10 +15,7 @@ void WarnIfOverscaleFactorCapsPrefetchDelta(const optional<uint8_t>& overscale, 
 }
 } // namespace
 
-Source::Impl::Impl(SourceType type_, std::string id_)
-    : type(type_),
-      id(std::move(id_)) {
-}
+Source::Impl::Impl(std::string id_) : id(std::move(id_)) {}
 
 void Source::Impl::setPrefetchZoomDelta(optional<uint8_t> delta) noexcept {
     prefetchZoomDelta = std::move(delta);
@@ -35,6 +33,15 @@ void Source::Impl::setMaxOverscaleFactorForParentTiles(optional<uint8_t> oversca
 
 optional<uint8_t> Source::Impl::getMaxOverscaleFactorForParentTiles() const noexcept {
     return maxOverscaleFactor;
+}
+
+int32_t Source::Impl::getCoveringZoomLevel(double zoom) const noexcept {
+    zoom += util::log2(util::tileSize / getTileSize());
+    if (getTypeInfo()->tileKind == TileKind::Raster) {
+        return ::round(zoom);
+    } else {
+        return std::floor(zoom);
+    }
 }
 
 } // namespace style

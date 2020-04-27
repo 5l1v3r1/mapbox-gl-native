@@ -1,21 +1,18 @@
-#include <mbgl/renderer/tile_pyramid.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_source.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/renderer/query.hpp>
+#include <algorithm>
+#include <cmath>
+#include <mapbox/geometry/envelope.hpp>
+#include <mbgl/algorithm/update_renderables.hpp>
 #include <mbgl/map/transform.hpp>
 #include <mbgl/math/clamp.hpp>
-#include <mbgl/util/tile_cover.hpp>
-#include <mbgl/util/tile_range.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/query.hpp>
+#include <mbgl/renderer/render_source.hpp>
+#include <mbgl/renderer/tile_parameters.hpp>
+#include <mbgl/renderer/tile_pyramid.hpp>
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/logging.hpp>
-
-#include <mbgl/algorithm/update_renderables.hpp>
-
-#include <mapbox/geometry/envelope.hpp>
-
-#include <cmath>
-#include <algorithm>
+#include <mbgl/util/tile_cover.hpp>
+#include <mbgl/util/tile_range.hpp>
 
 namespace mbgl {
 
@@ -23,9 +20,7 @@ using namespace style;
 
 static TileObserver nullObserver;
 
-TilePyramid::TilePyramid()
-    : observer(&nullObserver) {
-}
+TilePyramid::TilePyramid() : observer(&nullObserver) {}
 
 TilePyramid::~TilePyramid() = default;
 
@@ -84,9 +79,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
     handleWrapJump(parameters.transformState.getLatLng().longitude());
 
-    const auto type = sourceImpl.type;
     // Determine the overzooming/underzooming amounts and required tiles.
-    int32_t overscaledZoom = util::coveringZoomLevel(parameters.transformState.getZoom(), type, tileSize);
+    int32_t overscaledZoom = sourceImpl.getCoveringZoomLevel(parameters.transformState.getZoom());
     int32_t tileZoom = overscaledZoom;
     int32_t panZoom = zoomRange.max;
 
@@ -101,14 +95,13 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     if (overscaledZoom >= zoomRange.min) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
 
-
         // Make sure we're not reparsing overzoomed raster tiles.
-        if (type == SourceType::Raster) {
+        if (sourceImpl.getTypeInfo()->tileKind == TileKind::Raster) {
             tileZoom = idealZoom;
         }
 
         // Only attempt prefetching in continuous mode.
-        if (parameters.mode == MapMode::Continuous && type != style::SourceType::GeoJSON && type != style::SourceType::Annotations) {
+        if (parameters.mode == MapMode::Continuous && sourceImpl.getTypeInfo()->supportsTilePrefetch) {
             // Request lower zoom level tiles (if configured to do so) in an attempt
             // to show something on the screen faster at the cost of a little of bandwidth.
             const uint8_t prefetchZoomDelta =
@@ -123,8 +116,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
 
         idealTiles = util::tileCover(parameters.transformState, idealZoom, tileZoom);
-        if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
-            idealTiles.size() > 1) {
+        if (parameters.mode == MapMode::Tile && sourceImpl.getTypeInfo()->tileKind != TileKind::Raster &&
+            sourceImpl.getTypeInfo()->tileKind != TileKind::RasterDEM && idealTiles.size() > 1) {
             mbgl::Log::Warning(mbgl::Event::General,
                                "Provided camera options returned %zu tiles, only %s is taken in Tile mode.",
                                idealTiles.size(),
@@ -212,7 +205,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
     }
 
-    if (type != SourceType::Annotations) {
+    // TODO: can this be more generic than != "annotations"?
+    if (strcmp(sourceImpl.getTypeInfo()->type, "annotations") != 0) {
         size_t conservativeCacheSize =
             std::max(static_cast<float>(parameters.transformState.getSize().width) / tileSize, 1.0f) *
             std::max(static_cast<float>(parameters.transformState.getSize().height) / tileSize, 1.0f) *
@@ -303,9 +297,12 @@ void TilePyramid::handleWrapJump(float lng) {
 }
 
 std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRenderedFeatures(
-    const ScreenLineString& geometry, const TransformState& transformState,
-    const std::unordered_map<std::string, const RenderLayer*>& layers, const RenderedQueryOptions& options,
-    const mat4& projMatrix, const SourceFeatureState& featureState) const {
+    const ScreenLineString& geometry,
+    const TransformState& transformState,
+    const std::unordered_map<std::string, const RenderLayer*>& layers,
+    const RenderedQueryOptions& options,
+    const mat4& projMatrix,
+    const SourceFeatureState& featureState) const {
     std::unordered_map<std::string, std::vector<Feature>> result;
     if (renderedTiles.empty() || geometry.empty()) {
         return result;
@@ -315,18 +312,19 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
     queryGeometry.reserve(geometry.size());
 
     for (const auto& p : geometry) {
-        queryGeometry.push_back(TileCoordinate::fromScreenCoordinate(
-            transformState, 0, { p.x, transformState.getSize().height - p.y }).p);
+        queryGeometry.push_back(
+            TileCoordinate::fromScreenCoordinate(transformState, 0, {p.x, transformState.getSize().height - p.y}).p);
     }
 
     mapbox::geometry::box<double> box = mapbox::geometry::envelope(queryGeometry);
 
     auto cmp = [](const UnwrappedTileID& a, const UnwrappedTileID& b) {
         return std::tie(a.canonical.z, a.canonical.y, a.wrap, a.canonical.x) <
-            std::tie(b.canonical.z, b.canonical.y, b.wrap, b.canonical.x);
+               std::tie(b.canonical.z, b.canonical.y, b.wrap, b.canonical.x);
     };
 
-    std::map<UnwrappedTileID, std::reference_wrapper<Tile>, decltype(cmp)> sortedTiles{renderedTiles.begin(), renderedTiles.end(), cmp};
+    std::map<UnwrappedTileID, std::reference_wrapper<Tile>, decltype(cmp)> sortedTiles{
+        renderedTiles.begin(), renderedTiles.end(), cmp};
 
     auto maxPitchScaleFactor = transformState.maxPitchScaleFactor();
 
@@ -334,11 +332,14 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         const UnwrappedTileID& id = entry.first;
         Tile& tile = entry.second;
 
-        const float scale = transformState.getScale() / (1 << id.canonical.z); // equivalent to std::pow(2, transformState.getZoom() - id.canonical.z);
+        const float scale =
+            transformState.getScale() /
+            (1 << id.canonical.z); // equivalent to std::pow(2, transformState.getZoom() - id.canonical.z);
         auto queryPadding = maxPitchScaleFactor * tile.getQueryPadding(layers) * util::EXTENT / util::tileSize / scale;
 
         GeometryCoordinate tileSpaceBoundsMin = TileCoordinate::toGeometryCoordinate(id, box.min);
-        if (tileSpaceBoundsMin.x - queryPadding >= util::EXTENT || tileSpaceBoundsMin.y - queryPadding >= util::EXTENT) {
+        if (tileSpaceBoundsMin.x - queryPadding >= util::EXTENT ||
+            tileSpaceBoundsMin.y - queryPadding >= util::EXTENT) {
             continue;
         }
 
@@ -353,8 +354,8 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
             tileSpaceQueryGeometry.push_back(TileCoordinate::toGeometryCoordinate(id, c));
         }
 
-        tile.queryRenderedFeatures(result, tileSpaceQueryGeometry, transformState, layers, options, projMatrix,
-                                   featureState);
+        tile.queryRenderedFeatures(
+            result, tileSpaceQueryGeometry, transformState, layers, options, projMatrix, featureState);
     }
 
     return result;

@@ -6,18 +6,6 @@ namespace mbgl {
 
 namespace style {
 
-// TODO: should be in public source.hpp header
-enum class SourceType : uint8_t {
-    Vector,
-    Raster,
-    RasterDEM,
-    GeoJSON,
-    Video,
-    Annotations,
-    Image,
-    CustomVector
-};
-
 enum class VisibilityType : bool {
     Visible,
     None,

@@ -232,6 +232,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/property_value.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/source.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/source_data.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/source_parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/custom_geometry_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/geojson_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/image_source.hpp
@@ -244,6 +246,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/undefined.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_id.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_kind.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_necessity.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_request.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_task.hpp
@@ -686,6 +689,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/image_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/image_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_dem_source.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_dem_source_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_dem_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source_impl.hpp

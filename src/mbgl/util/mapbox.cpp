@@ -1,8 +1,9 @@
-#include <mbgl/util/mapbox.hpp>
+#include <mbgl/style/source.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/url.hpp>
+#include <mbgl/util/mapbox.hpp>
 #include <mbgl/util/tileset.hpp>
+#include <mbgl/util/url.hpp>
 
 #include <stdexcept>
 #include <vector>
@@ -112,8 +113,7 @@ std::string normalizeTileURL(const std::string& baseURL,
     return transformURL(tpl, str, url);
 }
 
-std::string
-canonicalizeTileURL(const std::string& str, const style::SourceType type, const uint16_t tileSize) {
+std::string canonicalizeTileURL(const std::string& str, const style::Source& source) {
     const char* version = "/v4/";
     const size_t versionLen = strlen(version);
 
@@ -132,8 +132,8 @@ canonicalizeTileURL(const std::string& str, const style::SourceType type, const 
     std::string result = "mapbox://tiles/";
     result.append(str, path.directory.first + versionLen, path.directory.second - versionLen);
     result.append(str, path.filename.first, path.filename.second);
-    if (type == style::SourceType::Raster || type == style::SourceType::RasterDEM) {
-        result += tileSize == util::tileSize ? "@2x" : "{ratio}";
+    if (source.getTypeInfo()->tileKind == TileKind::Raster) {
+        result += source.getTileSize() == util::tileSize ? "@2x" : "{ratio}";
     }
     result.append(str, path.extension.first, path.extension.second);
 
@@ -158,11 +158,11 @@ canonicalizeTileURL(const std::string& str, const style::SourceType type, const 
     return result;
 }
 
-void canonicalizeTileset(Tileset& tileset, const std::string& sourceURL, style::SourceType type, uint16_t tileSize) {
+void canonicalizeTileset(Tileset& tileset, const std::string& sourceURL, const style::Source& source) {
     // TODO: Remove this hack by delivering proper URLs in the TileJSON to begin with.
     if (isMapboxURL(sourceURL)) {
         for (auto& url : tileset.tiles) {
-            url = canonicalizeTileURL(url, type, tileSize);
+            url = canonicalizeTileURL(url, source);
         }
     }
 }

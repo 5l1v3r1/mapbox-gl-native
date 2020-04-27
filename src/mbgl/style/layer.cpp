@@ -12,11 +12,11 @@
 namespace mbgl {
 namespace style {
 
-static_assert(mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(LayerTypeInfo::TileKind::Geometry),
+static_assert(mbgl::underlying_type(TileKind::Geometry) == mbgl::underlying_type(LayerTypeInfo::TileKind::Geometry),
               "tile kind error");
-static_assert(mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(LayerTypeInfo::TileKind::Raster),
+static_assert(mbgl::underlying_type(TileKind::Raster) == mbgl::underlying_type(LayerTypeInfo::TileKind::Raster),
               "tile kind error");
-static_assert(mbgl::underlying_type(Tile::Kind::RasterDEM) == mbgl::underlying_type(LayerTypeInfo::TileKind::RasterDEM),
+static_assert(mbgl::underlying_type(TileKind::RasterDEM) == mbgl::underlying_type(LayerTypeInfo::TileKind::RasterDEM),
               "tile kind error");
 
 static LayerObserver nullObserver;

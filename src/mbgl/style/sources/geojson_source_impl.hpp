@@ -23,6 +23,8 @@ public:
 
     optional<std::string> getAttribution() const final;
 
+    DECLARE_SOURCE_TYPE_INFO;
+
 private:
     Immutable<GeoJSONOptions> options;
     std::shared_ptr<GeoJSONData> data;

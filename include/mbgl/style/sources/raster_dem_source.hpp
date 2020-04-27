@@ -14,12 +14,16 @@ class RasterDEMSource : public RasterSource {
 public:
     RasterDEMSource(std::string id, variant<std::string, Tileset> urlOrTileset, uint16_t tileSize);
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
-};
 
-template <>
-inline bool Source::is<RasterDEMSource>() const {
-    return getType() == SourceType::RasterDEM;
-}
+    class Impl;
+    const Impl& impl() const;
+
+    Value serialize() const override;
+
+protected:
+    Mutable<Source::Impl> createMutable() const noexcept final;
+    Mutable<Source::Impl> createMutable(Tileset tileset) const noexcept final;
+};
 
 } // namespace style
 } // namespace mbgl

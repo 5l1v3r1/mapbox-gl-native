@@ -140,10 +140,8 @@ const LayerRenderData* GeometryTileRenderData::getLayerRenderData(const style::L
    that could flag the tile as non-pending too early.
  */
 
-GeometryTile::GeometryTile(const OverscaledTileID& id_,
-                           std::string sourceID_,
-                           const TileParameters& parameters)
-    : Tile(Kind::Geometry, id_),
+GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, const TileParameters& parameters)
+    : Tile(TileKind::Geometry, id_),
       ImageRequestor(parameters.imageManager),
       sourceID(std::move(sourceID_)),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
@@ -159,8 +157,7 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
       mode(parameters.mode),
-      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {
-}
+      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
 
 GeometryTile::~GeometryTile() {
     glyphManager.removeRequestor(*this);

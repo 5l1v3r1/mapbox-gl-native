@@ -21,6 +21,9 @@ public:
     std::array<LatLng, 4> getCoordinates() const;
 
     optional<std::string> getAttribution() const final;
+
+    DECLARE_SOURCE_TYPE_INFO;
+
 private:
     std::array<LatLng, 4> coords;
     std::shared_ptr<PremultipliedImage> image;

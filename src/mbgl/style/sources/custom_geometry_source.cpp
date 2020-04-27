@@ -32,7 +32,7 @@ void CustomGeometrySource::loadDescription(FileSource&) {
 }
 
 bool CustomGeometrySource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(info->tileKind);
+    return mbgl::underlying_type(TileKind::Geometry) == mbgl::underlying_type(info->tileKind);
 }
 
 void CustomGeometrySource::setTileData(const CanonicalTileID& tileID,

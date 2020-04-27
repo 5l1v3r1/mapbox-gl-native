@@ -1,17 +1,18 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/optional.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/tile_coordinate.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/tile/tile_necessity.hpp>
-#include <mbgl/renderer/tile_mask.hpp>
 #include <mbgl/renderer/bucket.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mbgl/renderer/tile_mask.hpp>
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/style/layer_properties.hpp>
+#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mbgl/tile/tile_id.hpp>
+#include <mbgl/tile/tile_kind.hpp>
+#include <mbgl/tile/tile_necessity.hpp>
+#include <mbgl/util/chrono.hpp>
+#include <mbgl/util/feature.hpp>
+#include <mbgl/util/noncopyable.hpp>
+#include <mbgl/util/optional.hpp>
+#include <mbgl/util/tile_coordinate.hpp>
 
 #include <string>
 #include <memory>
@@ -48,15 +49,10 @@ inline bool operator!=(const TileUpdateParameters& a, const TileUpdateParameters
 }
 class Tile {
 public:
-    enum class Kind : uint8_t {
-        Geometry,
-        Raster,
-        RasterDEM
-    };
     Tile(const Tile&) = delete;
     Tile& operator=(const Tile&) = delete;
 
-    Tile(Kind, OverscaledTileID);
+    Tile(TileKind, OverscaledTileID);
     virtual ~Tile();
 
     virtual std::unique_ptr<TileRenderData> createRenderData() = 0;
@@ -74,7 +70,7 @@ public:
     //
     // Tile implementation should update the contained layer
     // render data with the given properties.
-    // 
+    //
     // Returns `true` if the corresponding render layer data is present in this tile (and i.e. it
     // was succesfully updated); returns `false` otherwise.
     virtual bool layerPropertiesUpdated(const Immutable<style::LayerProperties>& layerProperties) = 0;
@@ -124,7 +120,7 @@ public:
     bool isComplete() const {
         return loaded && !pending;
     }
-    
+
     // "holdForFade" is used to keep tiles in the render tree after they're no longer
     // ideal tiles in order to allow symbols to fade out
     virtual bool holdForFade() const {
@@ -143,7 +139,7 @@ public:
 
     void dumpDebugLogs() const;
 
-    const Kind kind;
+    const TileKind kind;
     OverscaledTileID id;
     optional<Timestamp> modified;
     optional<Timestamp> expires;

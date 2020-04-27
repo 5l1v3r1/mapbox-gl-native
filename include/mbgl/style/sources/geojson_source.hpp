@@ -1,13 +1,12 @@
 #pragma once
 
+#include <map>
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/geojson.hpp>
 #include <mbgl/util/optional.hpp>
-
-#include <map>
 #include <memory>
 #include <utility>
 
@@ -37,6 +36,7 @@ struct GeoJSONOptions {
 
     static Immutable<GeoJSONOptions> defaultOptions();
 };
+
 class GeoJSONData {
 public:
     using TileFeatures = mapbox::feature::feature_collection<int16_t>;
@@ -49,9 +49,9 @@ public:
     virtual void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>&) = 0;
 
     // SuperclusterData
-    virtual Features getChildren(std::uint32_t) = 0;
-    virtual Features getLeaves(std::uint32_t, std::uint32_t limit, std::uint32_t offset) = 0;
-    virtual std::uint8_t getClusterExpansionZoom(std::uint32_t) = 0;
+    virtual Features getChildren(std::uint32_t) const = 0;
+    virtual Features getLeaves(std::uint32_t, std::uint32_t limit, std::uint32_t offset) const = 0;
+    virtual std::uint8_t getClusterExpansionZoom(std::uint32_t) const = 0;
 
     virtual std::shared_ptr<Scheduler> getScheduler() { return nullptr; }
 };
@@ -64,7 +64,9 @@ public:
     void setURL(const std::string& url);
     void setGeoJSON(const GeoJSON&);
     void setGeoJSONData(std::shared_ptr<GeoJSONData>);
+    void setSourceData(SourceData data) override;
 
+    SourceDataResult getSourceData() const override;
     optional<std::string> getURL() const;
     const GeoJSONOptions& getOptions() const;
 
@@ -75,9 +77,9 @@ public:
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override {
-        return weakFactory.makeWeakPtr();
-    }
+    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+
+    Value serialize() const override;
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
@@ -86,13 +88,8 @@ private:
     optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
     std::shared_ptr<Scheduler> threadPool;
-    mapbox::base::WeakPtrFactory<Source> weakFactory {this};
+    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
 };
-
-template <>
-inline bool Source::is<GeoJSONSource>() const {
-    return getType() == SourceType::GeoJSON;
-}
 
 } // namespace style
 } // namespace mbgl

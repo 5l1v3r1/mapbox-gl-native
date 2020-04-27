@@ -10,9 +10,7 @@ AnnotationSource::AnnotationSource()
     : Source(makeMutable<Impl>()) {
 }
 
-AnnotationSource::Impl::Impl()
-    : Source::Impl(SourceType::Annotations, AnnotationManager::SourceID) {
-}
+AnnotationSource::Impl::Impl() : Source::Impl(AnnotationManager::SourceID) {}
 
 const AnnotationSource::Impl& AnnotationSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
@@ -32,6 +30,11 @@ bool AnnotationSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info)
 
 Mutable<Source::Impl> AnnotationSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
+}
+
+const SourceTypeInfo* AnnotationSource::Impl::staticTypeInfo() noexcept {
+    const static SourceTypeInfo typeInfo{"annotations", false, nullopt};
+    return &typeInfo;
 }
 
 } // namespace mbgl

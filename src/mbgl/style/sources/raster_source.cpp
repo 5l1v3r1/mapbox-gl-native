@@ -13,10 +13,11 @@
 namespace mbgl {
 namespace style {
 
-RasterSource::RasterSource(std::string id, variant<std::string, Tileset> urlOrTileset_, uint16_t tileSize, SourceType sourceType)
-    : Source(makeMutable<Impl>(sourceType, std::move(id), tileSize)),
-      urlOrTileset(std::move(urlOrTileset_)) {
-}
+RasterSource::RasterSource(std::string id, variant<std::string, Tileset> urlOrTileset_, uint16_t tileSize)
+    : Source(makeMutable<Impl>(std::move(id), tileSize)), urlOrTileset(std::move(urlOrTileset_)) {}
+
+RasterSource::RasterSource(Immutable<Impl>&& impl, variant<std::string, Tileset> urlOrTileset_)
+    : Source(std::move(impl)), urlOrTileset(std::move(urlOrTileset_)) {}
 
 RasterSource::~RasterSource() = default;
 
@@ -24,8 +25,8 @@ const RasterSource::Impl& RasterSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
 }
 
-const variant<std::string, Tileset>& RasterSource::getURLOrTileset() const {
-    return urlOrTileset;
+const variant<std::string, Tileset>* RasterSource::getURLOrTileset() const {
+    return &urlOrTileset;
 }
 
 optional<std::string> RasterSource::getURL() const {
@@ -36,13 +37,9 @@ optional<std::string> RasterSource::getURL() const {
     return urlOrTileset.get<std::string>();
 }
 
-uint16_t RasterSource::getTileSize() const {
-    return impl().getTileSize();
-}
-
 void RasterSource::loadDescription(FileSource& fileSource) {
     if (urlOrTileset.is<Tileset>()) {
-        baseImpl = makeMutable<Impl>(impl(), urlOrTileset.get<Tileset>());
+        baseImpl = createMutable(urlOrTileset.get<Tileset>());
         loaded = true;
         observer->onSourceLoaded(*this);
         return;
@@ -68,10 +65,10 @@ void RasterSource::loadDescription(FileSource& fileSource) {
                 return;
             }
 
-            util::mapbox::canonicalizeTileset(*tileset, url, getType(), getTileSize());
+            util::mapbox::canonicalizeTileset(*tileset, url, *this);
             bool changed = impl().tileset != *tileset;
 
-            baseImpl = makeMutable<Impl>(impl(), *tileset);
+            baseImpl = createMutable(*tileset);
             loaded = true;
 
             observer->onSourceLoaded(*this);
@@ -84,11 +81,21 @@ void RasterSource::loadDescription(FileSource& fileSource) {
 }
 
 bool RasterSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(info->tileKind);
+    return mbgl::underlying_type(TileKind::Raster) == mbgl::underlying_type(info->tileKind);
 }
 
 Mutable<Source::Impl> RasterSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
+}
+
+Mutable<Source::Impl> RasterSource::createMutable(Tileset tileset) const noexcept {
+    return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl(), std::move(tileset)));
+}
+
+Value RasterSource::serialize() const {
+    auto value = Source::serialize();
+    serializeUrlOrTileSet(value, getURLOrTileset());
+    return value;
 }
 
 } // namespace style

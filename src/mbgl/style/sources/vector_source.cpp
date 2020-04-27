@@ -10,11 +10,14 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/mapbox.hpp>
+#include <mbgl/util/util.hpp>
 
 namespace mbgl {
 namespace style {
 
-VectorSource::VectorSource(std::string id, variant<std::string, Tileset> urlOrTileset_, optional<float> maxZoom_,
+VectorSource::VectorSource(std::string id,
+                           variant<std::string, Tileset> urlOrTileset_,
+                           optional<float> maxZoom_,
                            optional<float> minZoom_)
     : Source(makeMutable<Impl>(std::move(id))),
       urlOrTileset(std::move(urlOrTileset_)),
@@ -27,8 +30,8 @@ const VectorSource::Impl& VectorSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
 }
 
-const variant<std::string, Tileset>& VectorSource::getURLOrTileset() const {
-    return urlOrTileset;
+const variant<std::string, Tileset>* VectorSource::getURLOrTileset() const {
+    return &urlOrTileset;
 }
 
 optional<std::string> VectorSource::getURL() const {
@@ -72,7 +75,7 @@ void VectorSource::loadDescription(FileSource& fileSource) {
             if (minZoom) {
                 tileset->zoomRange.min = *minZoom;
             }
-            util::mapbox::canonicalizeTileset(*tileset, url, getType(), util::tileSize);
+            util::mapbox::canonicalizeTileset(*tileset, url, *this);
             bool changed = impl().tileset != *tileset;
 
             baseImpl = makeMutable<Impl>(impl(), *tileset);
@@ -88,11 +91,17 @@ void VectorSource::loadDescription(FileSource& fileSource) {
 }
 
 bool VectorSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(info->tileKind);
+    return mbgl::underlying_type(TileKind::Geometry) == mbgl::underlying_type(info->tileKind);
 }
 
 Mutable<Source::Impl> VectorSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
+}
+
+Value VectorSource::serialize() const {
+    auto result = Source::serialize();
+    serializeUrlOrTileSet(result, getURLOrTileset());
+    return result;
 }
 
 } // namespace style

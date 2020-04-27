@@ -9,7 +9,6 @@
 namespace mbgl {
 
 class OverscaledTileID;
-class CanonicalTileID;
 template <class T>
 class Actor;
 class ThreadPool;
@@ -41,8 +40,8 @@ public:
     ~CustomGeometrySource() final;
     void loadDescription(FileSource&) final;
     void setTileData(const CanonicalTileID&, const GeoJSON&);
-    void invalidateTile(const CanonicalTileID&);
-    void invalidateRegion(const LatLngBounds&);
+    void invalidateTile(const CanonicalTileID&) override;
+    void invalidateRegion(const LatLngBounds&) override;
     // Private implementation
     class Impl;
     const Impl& impl() const;
@@ -59,11 +58,6 @@ private:
     std::unique_ptr<Actor<CustomTileLoader>> loader;
     mapbox::base::WeakPtrFactory<Source> weakFactory {this};
 };
-
-template <>
-inline bool Source::is<CustomGeometrySource>() const {
-    return getType() == SourceType::CustomVector;
-}
 
 } // namespace style
 } // namespace mbgl

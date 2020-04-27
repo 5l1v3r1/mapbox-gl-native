@@ -1,16 +1,15 @@
+#include <mbgl/annotation/render_annotation_source.hpp>
+#include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
+#include <mbgl/renderer/sources/render_custom_geometry_source.hpp>
 #include <mbgl/renderer/sources/render_geojson_source.hpp>
-#include <mbgl/renderer/sources/render_raster_source.hpp>
+#include <mbgl/renderer/sources/render_image_source.hpp>
 #include <mbgl/renderer/sources/render_raster_dem_source.hpp>
+#include <mbgl/renderer/sources/render_raster_source.hpp>
 #include <mbgl/renderer/sources/render_vector_source.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/annotation/render_annotation_source.hpp>
-#include <mbgl/renderer/sources/render_image_source.hpp>
-#include <mbgl/renderer/sources/render_custom_geometry_source.hpp>
 #include <mbgl/tile/tile.hpp>
-
-#include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/util/constants.hpp>
 #include <utility>
 
@@ -19,42 +18,38 @@ namespace mbgl {
 using namespace style;
 
 std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>& impl) {
-    switch (impl->type) {
-    case SourceType::Vector:
+    std::string sourceType{impl->getTypeInfo()->type};
+    if (sourceType == VectorSource::Impl::staticTypeInfo()->type) {
         return std::make_unique<RenderVectorSource>(staticImmutableCast<VectorSource::Impl>(impl));
-    case SourceType::Raster:
+    } else if (sourceType == RasterSource::Impl::staticTypeInfo()->type) {
         return std::make_unique<RenderRasterSource>(staticImmutableCast<RasterSource::Impl>(impl));
-    case SourceType::RasterDEM:
-        return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<RasterSource::Impl>(impl));
-    case SourceType::GeoJSON:
+    } else if (sourceType == RasterDEMSource::Impl::staticTypeInfo()->type) {
+        return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<RasterDEMSource::Impl>(impl));
+    } else if (sourceType == GeoJSONSource::Impl::staticTypeInfo()->type) {
         return std::make_unique<RenderGeoJSONSource>(staticImmutableCast<GeoJSONSource::Impl>(impl));
-    case SourceType::Video:
+    } else if (sourceType == "video") {
         assert(false);
         return nullptr;
-    case SourceType::Annotations:
+    } else if (sourceType == AnnotationSource::Impl::staticTypeInfo()->type) {
         if (LayerManager::annotationsEnabled) {
             return std::make_unique<RenderAnnotationSource>(staticImmutableCast<AnnotationSource::Impl>(impl));
         } else {
             assert(false);
             return nullptr;
         }
-    case SourceType::Image:
+    } else if (sourceType == ImageSource::Impl::staticTypeInfo()->type) {
         return std::make_unique<RenderImageSource>(staticImmutableCast<ImageSource::Impl>(impl));
-    case SourceType::CustomVector:
+    } else if (sourceType == CustomGeometrySource::Impl::staticTypeInfo()->type) {
         return std::make_unique<RenderCustomGeometrySource>(staticImmutableCast<CustomGeometrySource::Impl>(impl));
     }
 
-    // Not reachable, but placate GCC.
     assert(false);
     return nullptr;
 }
 
 static RenderSourceObserver nullObserver;
 
-RenderSource::RenderSource(Immutable<style::Source::Impl> impl)
-    : baseImpl(std::move(impl)),
-      observer(&nullObserver) {
-}
+RenderSource::RenderSource(Immutable<style::Source::Impl> impl) : baseImpl(std::move(impl)), observer(&nullObserver) {}
 
 RenderSource::~RenderSource() = default;
 
@@ -74,7 +69,7 @@ bool RenderSource::isEnabled() const {
     return enabled;
 }
 
-uint8_t RenderSource::getMaxZoom() const { 
+uint8_t RenderSource::getMaxZoom() const {
     assert(false);
     return util::TERRAIN_RGB_MAXZOOM;
 }

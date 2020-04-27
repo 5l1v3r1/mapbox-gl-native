@@ -582,7 +582,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
             // Only place this layer if it's the "group leader" for the bucket
             const Tile* tile = params.source->getRenderedTile(renderTile.id);
             assert(tile);
-            assert(tile->kind == Tile::Kind::Geometry);
+            assert(tile->kind == TileKind::Geometry);
 
             auto featureIndex = static_cast<const GeometryTile*>(tile)->getFeatureIndex();
 

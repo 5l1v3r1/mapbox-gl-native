@@ -50,7 +50,6 @@
 #include <gmock/gmock.h>
 
 using namespace mbgl;
-using SourceType = mbgl::style::SourceType;
 
 class SourceTest {
 public:
@@ -272,12 +271,13 @@ TEST(Source, RasterTileFail) {
     RasterSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(SourceType::Raster, source_.baseImpl->type);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_EQ("Failed by the test case", util::toString(error));
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(RasterSource::Impl::staticTypeInfo(), source_.baseImpl->getTypeInfo());
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_EQ("Failed by the test case", util::toString(error));
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -307,12 +307,13 @@ TEST(Source, RasterDEMTileFail) {
     RasterDEMSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(SourceType::RasterDEM, source_.baseImpl->type);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_EQ("Failed by the test case", util::toString(error));
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(RasterDEMSource::Impl::staticTypeInfo(), source_.baseImpl->getTypeInfo());
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_EQ("Failed by the test case", util::toString(error));
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -344,12 +345,13 @@ TEST(Source, VectorTileFail) {
     VectorSource source("source", tileset);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(SourceType::Vector, source_.baseImpl->type);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_EQ("Failed by the test case", util::toString(error));
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(VectorSource::Impl::staticTypeInfo(), source_.baseImpl->getTypeInfo());
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_EQ("Failed by the test case", util::toString(error));
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -377,13 +379,14 @@ TEST(Source, RasterTileCorrupt) {
     RasterSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(source_.baseImpl->type, SourceType::Raster);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_TRUE(bool(error));
-        // Not asserting on platform-specific error text.
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(RasterSource::Impl::staticTypeInfo(), source_.baseImpl->getTypeInfo());
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_TRUE(bool(error));
+            // Not asserting on platform-specific error text.
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -411,13 +414,14 @@ TEST(Source, RasterDEMTileCorrupt) {
     RasterDEMSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(source_.baseImpl->type, SourceType::RasterDEM);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_TRUE(bool(error));
-        // Not asserting on platform-specific error text.
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(RasterDEMSource::Impl::staticTypeInfo(), source_.baseImpl->getTypeInfo());
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_TRUE(bool(error));
+            // Not asserting on platform-specific error text.
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -447,12 +451,13 @@ TEST(Source, VectorTileCorrupt) {
     VectorSource source("source", tileset);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(source_.baseImpl->type, SourceType::Vector);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_EQ(util::toString(error), "unknown pbf field type exception");
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(VectorSource::Impl::staticTypeInfo(), source_.baseImpl->getTypeInfo());
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_EQ(util::toString(error), "unknown pbf field type exception");
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -745,7 +750,7 @@ class FakeTileSource;
 class FakeTile : public Tile {
 public:
     FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID)
-        : Tile(Tile::Kind::Geometry, tileID), source(source_) {
+        : Tile(TileKind::Geometry, tileID), source(source_) {
         renderable = true;
     }
     void setNecessity(TileNecessity necessity) override;
