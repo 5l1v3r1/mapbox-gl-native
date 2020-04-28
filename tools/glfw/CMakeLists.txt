@@ -1,3 +1,7 @@
+if(NOT CMAKE_SYSTEM_NAME STREQUAL Linux AND NOT CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    return()
+endif()
+
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
 
@@ -5,23 +9,23 @@ pkg_search_module(GLFW glfw3 REQUIRED)
 
 add_executable(
     mbgl-glfw
-    ${PROJECT_SOURCE_DIR}/platform/glfw/main.cpp
-    ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_view.cpp
-    ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_renderer_frontend.cpp
-    ${PROJECT_SOURCE_DIR}/platform/glfw/settings_json.cpp
-    ${PROJECT_SOURCE_DIR}/platform/glfw/test_writer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/glfw_view.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/glfw_renderer_frontend.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/settings_json.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/test_writer.cpp
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
 )
 
 set_property(
-    SOURCE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_view.cpp
-    PROPERTY COMPILE_DEFINITIONS MAPBOX_PUCK_ASSETS_PATH=\"${PROJECT_SOURCE_DIR}/platform/glfw/assets/\"
+    SOURCE ${CMAKE_CURRENT_LIST_DIR}/glfw_view.cpp
+    PROPERTY COMPILE_DEFINITIONS MAPBOX_PUCK_ASSETS_PATH=\"${CMAKE_CURRENT_LIST_DIR}/assets/\"
 )
 
 if(MBGL_WITH_OPENGL)
     target_sources(
         mbgl-glfw
-        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_gl_backend.cpp
+        PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glfw_gl_backend.cpp
     )
     target_compile_definitions(
         mbgl-glfw
@@ -50,9 +54,9 @@ target_link_libraries(
         Mapbox::Base::Extras::args
         Mapbox::Base::Extras::filesystem
         Mapbox::Base::Extras::rapidjson
+        Mapbox::Base::cheap-ruler-cpp
         Mapbox::Map
         mbgl-compiler-options
-        Mapbox::Base::cheap-ruler-cpp
 )
 
 if(MBGL_WITH_OPENGL)
@@ -65,3 +69,7 @@ endif()
 set_property(TARGET mbgl-glfw PROPERTY FOLDER Executables)
 
 install(TARGETS mbgl-glfw RUNTIME DESTINATION bin)
+
+if(NOT MBGL_PUBLIC_BUILD)
+    include(${PROJECT_SOURCE_DIR}/internal/tools/glfw/internal.cmake)
+endif()

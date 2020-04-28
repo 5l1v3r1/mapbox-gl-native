@@ -1049,6 +1049,6 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/tools)
 
-if(EXISTS ${PROJECT_SOURCE_DIR}/internal/internal.cmake)
+if(NOT MBGL_PUBLIC_BUILD)
     include(${PROJECT_SOURCE_DIR}/internal/internal.cmake)
 endif()
