@@ -63,7 +63,6 @@ target_sources(
 
 target_compile_options(mbgl-core PRIVATE -fobjc-arc)
 
-# FIXME: Should not be needed, but now needed by node because of the headless frontend.
 target_include_directories(
     mbgl-core
     PUBLIC ${PROJECT_SOURCE_DIR}/platform/default/include
@@ -90,7 +89,6 @@ target_link_libraries(
 )
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
 
 add_executable(
     mbgl-test-runner

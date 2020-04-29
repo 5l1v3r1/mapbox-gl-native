@@ -112,7 +112,7 @@ workflows:
           requires:
             - sanity-checks
           config_params: '-G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8 -DCMAKE_CXX_FLAGS=-DSANITIZE'
-          test_params: '-j 4 -E "mbgl-node|gl-benchmark" -D ExperimentalMemCheck || true'
+          test_params: '-j 4 -E "gl-benchmark" -D ExperimentalMemCheck || true'
       - build-template:
           name: linux-ubsan
           executor_name: ubuntu-eoan

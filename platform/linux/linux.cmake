@@ -52,7 +52,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_glx.cpp
 )
 
-# FIXME: Should not be needed, but now needed by node because of the headless frontend.
 target_include_directories(
     mbgl-core
     PUBLIC ${PROJECT_SOURCE_DIR}/platform/default/include
@@ -97,7 +96,6 @@ target_link_libraries(
 )
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
 
 add_executable(
     mbgl-test-runner
