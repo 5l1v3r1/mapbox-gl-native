@@ -16,7 +16,7 @@ namespace style {
 RasterSource::RasterSource(std::string id, variant<std::string, Tileset> urlOrTileset_, uint16_t tileSize)
     : Source(makeMutable<Impl>(std::move(id), tileSize)), urlOrTileset(std::move(urlOrTileset_)) {}
 
-RasterSource::RasterSource(Immutable<Impl>&& impl, variant<std::string, Tileset> urlOrTileset_)
+RasterSource::RasterSource(Immutable<Impl> impl, variant<std::string, Tileset> urlOrTileset_)
     : Source(std::move(impl)), urlOrTileset(std::move(urlOrTileset_)) {}
 
 RasterSource::~RasterSource() = default;
@@ -31,7 +31,7 @@ const variant<std::string, Tileset>* RasterSource::getURLOrTileset() const {
 
 optional<std::string> RasterSource::getURL() const {
     if (urlOrTileset.is<Tileset>()) {
-        return {};
+        return nullopt;
     }
 
     return urlOrTileset.get<std::string>();

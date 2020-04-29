@@ -8,7 +8,8 @@ RasterDEMSource::Impl::Impl(std::string id_, uint16_t tileSize_) : RasterSource:
 RasterDEMSource::Impl::Impl(const Impl& other, Tileset tileset_) : RasterSource::Impl(other, std::move(tileset_)) {}
 
 const SourceTypeInfo* RasterDEMSource::Impl::staticTypeInfo() noexcept {
-    const static SourceTypeInfo typeInfo{"raster-dem", true, TileKind::RasterDEM};
+    const static SourceTypeInfo typeInfo{
+        "raster-dem", SourceTypeInfo::TilePrefetch::Yes, SourceTypeInfo::TileSet::Yes, TileKind::RasterDEM};
     return &typeInfo;
 }
 

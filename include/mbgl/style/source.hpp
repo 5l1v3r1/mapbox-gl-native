@@ -40,11 +40,15 @@ struct SourceTypeInfo {
     /**
      * @brief specifies whether the source supports tile prefetching;
      */
-    const bool supportsTilePrefetch;
+    const enum class TilePrefetch : bool { No, Yes } tilePrefetch;
+
+    /**
+     * @brief specifies whether the source operates with the loaded tile set;
+     */
+    const enum class TileSet : bool { No, Yes } tileSet;
 
     /**
      * @brief specifies source's tile kind;
-     *
      */
     const optional<TileKind> tileKind;
 };
@@ -88,13 +92,13 @@ public:
 
     virtual void loadDescription(FileSource&) = 0;
 
-    virtual void setSourceData(SourceData){};
+    virtual void setSourceData(SourceData) {}
 
     virtual SourceDataResult getSourceData() const { return {}; }
 
     virtual const variant<std::string, Tileset>* getURLOrTileset() const { return nullptr; }
 
-    virtual void setSourceParameters(SourceParameters){};
+    virtual void setSourceParameters(SourceParameters) {}
 
     virtual void invalidateTile(const CanonicalTileID&) {}
     virtual void invalidateRegion(const LatLngBounds&) {}

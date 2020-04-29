@@ -32,7 +32,7 @@ public:
     Value serialize() const override;
 
 protected:
-    RasterSource(Immutable<Impl>&&, variant<std::string, Tileset> urlOrTileset_);
+    RasterSource(Immutable<Impl>, variant<std::string, Tileset> urlOrTileset_);
 
     Mutable<Source::Impl> createMutable() const noexcept override;
     virtual Mutable<Source::Impl> createMutable(Tileset tileset) const noexcept;

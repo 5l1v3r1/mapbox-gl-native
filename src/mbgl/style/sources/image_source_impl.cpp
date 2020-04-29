@@ -27,7 +27,8 @@ optional<std::string> ImageSource::Impl::getAttribution() const {
 }
 
 const SourceTypeInfo* ImageSource::Impl::staticTypeInfo() noexcept {
-    const static SourceTypeInfo typeInfo{"image", true, nullopt};
+    const static SourceTypeInfo typeInfo{
+        "image", SourceTypeInfo::TilePrefetch::No, SourceTypeInfo::TileSet::No, nullopt};
     return &typeInfo;
 }
 

@@ -33,7 +33,8 @@ Mutable<Source::Impl> AnnotationSource::createMutable() const noexcept {
 }
 
 const SourceTypeInfo* AnnotationSource::Impl::staticTypeInfo() noexcept {
-    const static SourceTypeInfo typeInfo{"annotations", false, nullopt};
+    const static SourceTypeInfo typeInfo{
+        "annotations", SourceTypeInfo::TilePrefetch::No, SourceTypeInfo::TileSet::No, nullopt};
     return &typeInfo;
 }
 

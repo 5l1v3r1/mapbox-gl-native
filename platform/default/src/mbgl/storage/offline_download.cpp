@@ -217,22 +217,22 @@ void OfflineDownload::activateDownload() {
                 sourceResource.setPriority(Resource::Priority::Low);
                 sourceResource.setUsage(Resource::Usage::Offline);
 
-                ensureResource(std::move(sourceResource),
-                               [=, source = std::make_shared<std::unique_ptr<Source>>(std::move(source))](
-                                   const Response& sourceResponse) {
-                                   style::conversion::Error error;
-                                   optional<Tileset> tileset =
-                                       style::conversion::convertJSON<Tileset>(*sourceResponse.data, error);
-                                   if (tileset) {
-                                       util::mapbox::canonicalizeTileset(*tileset, url, **source);
-                                       queueTiles(**source, *tileset);
+                ensureResource(
+                    std::move(sourceResource),
+                    [=, source = std::shared_ptr<Source>(std::move(source))](const Response& sourceResponse) {
+                        style::conversion::Error error;
+                        optional<Tileset> tileset =
+                            style::conversion::convertJSON<Tileset>(*sourceResponse.data, error);
+                        if (tileset) {
+                            util::mapbox::canonicalizeTileset(*tileset, url, *source);
+                            queueTiles(*source, *tileset);
 
-                                       requiredSourceURLs.erase(url);
-                                       if (requiredSourceURLs.empty()) {
-                                           status.requiredResourceCountIsPrecise = true;
-                                       }
-                                   }
-                               });
+                            requiredSourceURLs.erase(url);
+                            if (requiredSourceURLs.empty()) {
+                                status.requiredResourceCountIsPrecise = true;
+                            }
+                        }
+                    });
             }
         };
 

@@ -20,7 +20,8 @@ optional<std::string> RasterSource::Impl::getAttribution() const {
 }
 
 const SourceTypeInfo* RasterSource::Impl::staticTypeInfo() noexcept {
-    const static SourceTypeInfo typeInfo{"raster", true, TileKind::Raster};
+    const static SourceTypeInfo typeInfo{
+        "raster", SourceTypeInfo::TilePrefetch::Yes, SourceTypeInfo::TileSet::Yes, TileKind::Raster};
     return &typeInfo;
 }
 

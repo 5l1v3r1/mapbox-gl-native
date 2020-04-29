@@ -142,7 +142,8 @@ optional<std::string> GeoJSONSource::Impl::getAttribution() const {
 }
 
 const SourceTypeInfo* GeoJSONSource::Impl::staticTypeInfo() noexcept {
-    const static SourceTypeInfo typeInfo{"geojson", false, TileKind::Geometry};
+    const static SourceTypeInfo typeInfo{
+        "geojson", SourceTypeInfo::TilePrefetch::No, SourceTypeInfo::TileSet::No, TileKind::Geometry};
     return &typeInfo;
 }
 

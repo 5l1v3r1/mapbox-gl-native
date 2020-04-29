@@ -34,7 +34,8 @@ optional<ActorRef<CustomTileLoader>> CustomGeometrySource::Impl::getTileLoader()
 }
 
 const SourceTypeInfo* CustomGeometrySource::Impl::staticTypeInfo() noexcept {
-    const static SourceTypeInfo typeInfo{"customvector", true, nullopt};
+    const static SourceTypeInfo typeInfo{
+        "customvector", SourceTypeInfo::TilePrefetch::Yes, SourceTypeInfo::TileSet::No, nullopt};
     return &typeInfo;
 }
 

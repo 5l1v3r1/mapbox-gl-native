@@ -101,7 +101,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
 
         // Only attempt prefetching in continuous mode.
-        if (parameters.mode == MapMode::Continuous && sourceImpl.getTypeInfo()->supportsTilePrefetch) {
+        if (parameters.mode == MapMode::Continuous && mbgl::underlying_type(sourceImpl.getTypeInfo()->tilePrefetch)) {
             // Request lower zoom level tiles (if configured to do so) in an attempt
             // to show something on the screen faster at the cost of a little of bandwidth.
             const uint8_t prefetchZoomDelta =

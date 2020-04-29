@@ -15,7 +15,8 @@ optional<std::string> VectorSource::Impl::getAttribution() const {
 }
 
 const SourceTypeInfo* VectorSource::Impl::staticTypeInfo() noexcept {
-    const static SourceTypeInfo typeInfo{"vector", true, TileKind::Geometry};
+    const static SourceTypeInfo typeInfo{
+        "vector", SourceTypeInfo::TilePrefetch::Yes, SourceTypeInfo::TileSet::Yes, TileKind::Geometry};
     return &typeInfo;
 }
 
