@@ -318,7 +318,7 @@ commands:
       - run:
           name: << parameters.step_name >>
           command: |
-            build/mbgl-render-test-runner << parameters.metrics_params >>
+            build/bin/mbgl-render-test-runner << parameters.metrics_params >>
   save:
     steps:
       - save_cache:
