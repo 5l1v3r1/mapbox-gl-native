@@ -1,51 +1,12 @@
-#include <mbgl/annotation/render_annotation_source.hpp>
-#include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
-#include <mbgl/renderer/sources/render_custom_geometry_source.hpp>
-#include <mbgl/renderer/sources/render_geojson_source.hpp>
-#include <mbgl/renderer/sources/render_image_source.hpp>
-#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
-#include <mbgl/renderer/sources/render_raster_source.hpp>
-#include <mbgl/renderer/sources/render_vector_source.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/constants.hpp>
-#include <utility>
 
 namespace mbgl {
 
 using namespace style;
-
-std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>& impl) {
-    std::string sourceType{impl->getTypeInfo()->type};
-    if (sourceType == VectorSource::Impl::staticTypeInfo()->type) {
-        return std::make_unique<RenderVectorSource>(staticImmutableCast<VectorSource::Impl>(impl));
-    } else if (sourceType == RasterSource::Impl::staticTypeInfo()->type) {
-        return std::make_unique<RenderRasterSource>(staticImmutableCast<RasterSource::Impl>(impl));
-    } else if (sourceType == RasterDEMSource::Impl::staticTypeInfo()->type) {
-        return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<RasterDEMSource::Impl>(impl));
-    } else if (sourceType == GeoJSONSource::Impl::staticTypeInfo()->type) {
-        return std::make_unique<RenderGeoJSONSource>(staticImmutableCast<GeoJSONSource::Impl>(impl));
-    } else if (sourceType == "video") {
-        assert(false);
-        return nullptr;
-    } else if (sourceType == AnnotationSource::Impl::staticTypeInfo()->type) {
-        if (LayerManager::annotationsEnabled) {
-            return std::make_unique<RenderAnnotationSource>(staticImmutableCast<AnnotationSource::Impl>(impl));
-        } else {
-            assert(false);
-            return nullptr;
-        }
-    } else if (sourceType == ImageSource::Impl::staticTypeInfo()->type) {
-        return std::make_unique<RenderImageSource>(staticImmutableCast<ImageSource::Impl>(impl));
-    } else if (sourceType == CustomGeometrySource::Impl::staticTypeInfo()->type) {
-        return std::make_unique<RenderCustomGeometrySource>(staticImmutableCast<CustomGeometrySource::Impl>(impl));
-    }
-
-    assert(false);
-    return nullptr;
-}
 
 static RenderSourceObserver nullObserver;
 

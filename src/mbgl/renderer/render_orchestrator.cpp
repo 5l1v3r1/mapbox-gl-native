@@ -1,31 +1,32 @@
 #include <mbgl/renderer/render_orchestrator.hpp>
 
 #include <mbgl/annotation/annotation_manager.hpp>
+#include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
-#include <mbgl/renderer/renderer_observer.hpp>
-#include <mbgl/renderer/render_source.hpp>
+#include <mbgl/renderer/image_manager.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/pattern_atlas.hpp>
+#include <mbgl/renderer/property_evaluation_parameters.hpp>
+#include <mbgl/renderer/query.hpp>
 #include <mbgl/renderer/render_layer.hpp>
+#include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
+#include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/renderer/renderer_observer.hpp>
+#include <mbgl/renderer/style_diff.hpp>
+#include <mbgl/renderer/tile_parameters.hpp>
+#include <mbgl/renderer/transition_parameters.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
-#include <mbgl/renderer/pattern_atlas.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/transition_parameters.hpp>
-#include <mbgl/renderer/property_evaluation_parameters.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/style_diff.hpp>
-#include <mbgl/renderer/query.hpp>
-#include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/geometry/line_atlas.hpp>
+#include <mbgl/sourcemanager/source_manager.hpp>
 #include <mbgl/style/source_impl.hpp>
 #include <mbgl/style/transition_options.hpp>
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/string.hpp>
-#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 
@@ -276,7 +277,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Create render sources for newly added sources.
     for (const auto& entry : sourceDiff.added) {
-        std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second);
+        std::unique_ptr<RenderSource> renderSource = SourceManager::get()->createRenderSource(entry.second);
         renderSource->setObserver(this);
         renderSources.emplace(entry.first, std::move(renderSource));
     }

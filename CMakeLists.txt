@@ -174,6 +174,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/tileset.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/url_or_tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/transition_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion_impl.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/assertion.hpp
@@ -234,6 +235,23 @@ add_library(
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/source_data.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/source_parameters.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/source_manager.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/source_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/annotation_source_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/custom_geometry_source_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/geojson_source_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/image_source_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/raster_dem_source_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/raster_source_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/vector_source_factory.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/source_manager.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/annotation_source_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/custom_geometry_source_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/geojson_source_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/image_source_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/raster_dem_source_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/raster_source_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/vector_source_factory.cpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/custom_geometry_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/geojson_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/image_source.hpp
@@ -571,6 +589,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/stringify.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/tileset.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/url_or_tileset.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/transition_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/custom_tile_loader.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/custom_tile_loader.hpp

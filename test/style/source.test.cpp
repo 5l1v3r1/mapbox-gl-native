@@ -4,6 +4,8 @@
 #include <mbgl/test/stub_style_observer.hpp>
 #include <mbgl/test/util.hpp>
 
+#include <mbgl/sourcemanager/source_manager.hpp>
+
 #include <mbgl/style/layers/circle_layer.hpp>
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 #include <mbgl/style/layers/hillshade_layer.hpp>
@@ -171,7 +173,7 @@ TEST(Source, RasterTileEmpty) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -206,7 +208,7 @@ TEST(Source, RasterDEMTileEmpty) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -243,7 +245,7 @@ TEST(Source, VectorTileEmpty) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -279,7 +281,7 @@ TEST(Source, RasterTileFail) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -315,7 +317,7 @@ TEST(Source, RasterDEMTileFail) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -353,7 +355,7 @@ TEST(Source, VectorTileFail) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -388,7 +390,7 @@ TEST(Source, RasterTileCorrupt) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -423,7 +425,7 @@ TEST(Source, RasterDEMTileCorrupt) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -459,7 +461,7 @@ TEST(Source, VectorTileCorrupt) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -492,7 +494,7 @@ TEST(Source, RasterTileCancel) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -525,7 +527,7 @@ TEST(Source, RasterDEMTileCancel) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -560,7 +562,7 @@ TEST(Source, VectorTileCancel) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -602,7 +604,7 @@ TEST(Source, RasterTileAttribution) {
     source.setObserver(&test.styleObserver);
     source.loadDescription(*test.fileSource);
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
     test.run();
@@ -641,7 +643,7 @@ TEST(Source, RasterDEMTileAttribution) {
     source.setObserver(&test.styleObserver);
     source.loadDescription(*test.fileSource);
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
     test.run();
@@ -732,7 +734,7 @@ TEST(Source, CustomGeometrySourceSetTileData) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -967,7 +969,7 @@ TEST(Source, SetMaxParentOverscaleFactor) {
     ASSERT_EQ(3, *source.getMaxOverscaleFactorForParentTiles());
     source.loadDescription(*test.fileSource);
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = SourceManager::get()->createRenderSource(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 

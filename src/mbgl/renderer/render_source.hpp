@@ -47,7 +47,6 @@ using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<con
 
 class RenderSource : protected TileObserver {
 public:
-    static std::unique_ptr<RenderSource> create(const Immutable<style::Source::Impl>&);
     ~RenderSource() override;
 
     bool isEnabled() const;
