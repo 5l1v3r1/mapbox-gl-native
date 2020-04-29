@@ -19,6 +19,7 @@ if(NOT EXISTS ${PROJECT_SOURCE_DIR}/internal/internal.cmake)
     set(MBGL_PUBLIC_BUILD TRUE)
 endif()
 
+option(BUILD_SHARED_LIBS "Build shared libraries instead of static" OFF)
 option(MBGL_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MBGL_WITH_COVERAGE "Enable code coverage collection" OFF)
 option(MBGL_WITH_QT "Build Mapbox GL Qt bindings" OFF)
