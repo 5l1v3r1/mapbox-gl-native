@@ -98,12 +98,20 @@ public:
     /**
      * @brief Returns resource for loading, if required by this source; returns `nullopt` otherwise.
      *
+     * If already loaded, this will return nullopt as well for Tiled sources (SourceTypeInfo::TileSet == Yes)
+     *
      * @return optional<Resource>
      */
     virtual optional<Resource> getResource() const { return nullopt; }
-    // TODO: Convert below to
-    // `virtual const Tileset* getTileset() const;`
-    virtual const variant<std::string, Tileset>* getURLOrTileset() const { return nullptr; }
+
+    /**
+     * @brief for tiled sources (SourceTypeInfo::TileSet == Yes) this will return the TileSet when
+     * loaded, nullptr in any other case.
+     *
+     * @return Tileset* or nullptr
+     */
+    virtual const Tileset* getTileset() const { return nullptr; }
+
     /**
      * @brief Returns the GeoJSON data, if this source supports GeoJSON format; returns `nullptr` otherwise.
      *
@@ -165,7 +173,7 @@ public:
 protected:
     explicit Source(Immutable<Impl>);
 
-    void serializeUrlOrTileSet(Value&, const variant<std::string, Tileset>*) const;
+    void serializeUrlOrTileSet(Value&, const variant<std::string, Tileset>&) const;
     void serializeTileSet(Value&, const mbgl::Tileset&) const;
 
     virtual Mutable<Impl> createMutable() const noexcept = 0;

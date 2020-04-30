@@ -25,8 +25,11 @@ const RasterSource::Impl& RasterSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
 }
 
-const variant<std::string, Tileset>* RasterSource::getURLOrTileset() const {
-    return &urlOrTileset;
+const Tileset* RasterSource::getTileset() const {
+    if (urlOrTileset.is<Tileset>()) {
+        return &urlOrTileset.get<Tileset>();
+    }
+    return nullptr;
 }
 
 optional<std::string> RasterSource::getURL() const {
@@ -35,6 +38,14 @@ optional<std::string> RasterSource::getURL() const {
     }
 
     return urlOrTileset.get<std::string>();
+}
+
+optional<Resource> RasterSource::getResource() const {
+    if (urlOrTileset.is<std::string>()) {
+        return Resource::source(urlOrTileset.get<std::string>());
+    }
+
+    return nullopt;
 }
 
 void RasterSource::loadDescription(FileSource& fileSource) {
@@ -94,7 +105,7 @@ Mutable<Source::Impl> RasterSource::createMutable(Tileset tileset) const noexcep
 
 Value RasterSource::serialize() const {
     auto value = Source::serialize();
-    serializeUrlOrTileSet(value, getURLOrTileset());
+    serializeUrlOrTileSet(value, urlOrTileset);
     return value;
 }
 

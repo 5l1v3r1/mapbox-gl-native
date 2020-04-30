@@ -30,8 +30,11 @@ const VectorSource::Impl& VectorSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
 }
 
-const variant<std::string, Tileset>* VectorSource::getURLOrTileset() const {
-    return &urlOrTileset;
+const Tileset* VectorSource::getTileset() const {
+    if (urlOrTileset.is<Tileset>()) {
+        return &urlOrTileset.get<Tileset>();
+    }
+    return nullptr;
 }
 
 optional<std::string> VectorSource::getURL() const {
@@ -40,6 +43,14 @@ optional<std::string> VectorSource::getURL() const {
     }
 
     return urlOrTileset.get<std::string>();
+}
+
+optional<Resource> VectorSource::getResource() const {
+    if (urlOrTileset.is<std::string>()) {
+        return Resource::source(urlOrTileset.get<std::string>());
+    }
+
+    return nullopt;
 }
 
 void VectorSource::loadDescription(FileSource& fileSource) {
@@ -100,7 +111,7 @@ Mutable<Source::Impl> VectorSource::createMutable() const noexcept {
 
 Value VectorSource::serialize() const {
     auto result = Source::serialize();
-    serializeUrlOrTileSet(result, getURLOrTileset());
+    serializeUrlOrTileSet(result, urlOrTileset);
     return result;
 }
 

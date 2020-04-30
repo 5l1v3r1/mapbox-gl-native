@@ -16,7 +16,8 @@ public:
                  optional<float> minZoom = nullopt);
     ~VectorSource() final;
 
-    const variant<std::string, Tileset>* getURLOrTileset() const final;
+    const Tileset* getTileset() const final;
+    optional<Resource> getResource() const final;
     optional<std::string> getURL() const;
 
     class Impl;

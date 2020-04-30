@@ -125,12 +125,10 @@ void Source::serializeTileSet(Value& value, const mbgl::Tileset& tileset) const 
     }
 }
 
-void Source::serializeUrlOrTileSet(Value& value, const mbgl::variant<std::string, mbgl::Tileset>* urlOrTileSet) const {
+void Source::serializeUrlOrTileSet(Value& value, const mbgl::variant<std::string, mbgl::Tileset>& urlOrTileSet) const {
     assert(value.getObject());
 
-    if (!urlOrTileSet) return;
-
-    urlOrTileSet->match(
+    urlOrTileSet.match(
         [&](const std::string& url) {
             value.getObject()->insert({"url", url});
         },

@@ -143,32 +143,35 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
     result->requiredResourceCountIsPrecise = true;
 
     for (const auto& source : parser.sources) {
-        auto handleTiledSource = [&](const variant<std::string, Tileset>& urlOrTileset) {
-            if (urlOrTileset.is<Tileset>()) {
-                uint64_t tileSourceCount = tileCount(definition, *source, urlOrTileset.get<Tileset>().zoomRange);
-                result->requiredTileCount += tileSourceCount;
-                result->requiredResourceCount += tileSourceCount;
-            } else {
-                result->requiredResourceCount += 1;
-                const auto& url = urlOrTileset.get<std::string>();
-                optional<Response> sourceResponse = offlineDatabase.get(Resource::source(url));
-                if (sourceResponse) {
-                    style::conversion::Error error;
-                    optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse->data, error);
-                    if (tileset) {
-                        uint64_t tileSourceCount = tileCount(definition, *source, (*tileset).zoomRange);
-                        result->requiredTileCount += tileSourceCount;
-                        result->requiredResourceCount += tileSourceCount;
-                    }
-                } else {
-                    result->requiredResourceCountIsPrecise = false;
+        auto handleTiledSourceWithResource = [&](const Resource& resource) {
+            result->requiredResourceCount += 1;
+            if (auto sourceResponse = offlineDatabase.get(resource)) {
+                style::conversion::Error error;
+                optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse->data, error);
+                if (tileset) {
+                    uint64_t tileSourceCount = tileCount(definition, *source, (*tileset).zoomRange);
+                    result->requiredTileCount += tileSourceCount;
+                    result->requiredResourceCount += tileSourceCount;
                 }
+            } else {
+                result->requiredResourceCountIsPrecise = false;
             }
         };
 
-        auto urlOrTileSet = source->getURLOrTileset();
-        if (urlOrTileSet) {
-            handleTiledSource(*urlOrTileSet);
+        auto handleTiledSourceWithTileset = [&](const Tileset& tileset) {
+            uint64_t tileSourceCount = tileCount(definition, *source, tileset.zoomRange);
+            result->requiredTileCount += tileSourceCount;
+            result->requiredResourceCount += tileSourceCount;
+        };
+
+        if (source->getTypeInfo()->tileSet == SourceTypeInfo::TileSet::Yes) {
+            if (auto resource = source->getResource()) {
+                handleTiledSourceWithResource(*resource);
+            } else if (auto* tileset = source->getTileset()) {
+                handleTiledSourceWithTileset(*tileset);
+            } else {
+                assert(false);
+            }
         } else if (source->getResource()) {
             result->requiredResourceCount += 1;
         }
@@ -203,29 +206,28 @@ void OfflineDownload::activateDownload() {
         style::Parser parser;
         parser.parse(*styleResponse.data);
 
-        auto handleTiledSource = [this](std::unique_ptr<Source> source,
-                                        const variant<std::string, Tileset>& urlOrTileset) mutable {
-            if (urlOrTileset.is<Tileset>()) {
-                queueTiles(*source, urlOrTileset.get<Tileset>());
-            } else {
-                const auto& url = urlOrTileset.get<std::string>();
+        auto handleTiledSource = [this](std::unique_ptr<Source> source) mutable {
+            assert(source->getTypeInfo()->tileSet == SourceTypeInfo::TileSet::Yes);
+
+            if (auto* tileset = source->getTileset()) {
+                queueTiles(*source, *tileset);
+            } else if (auto sourceResource = source->getResource()) {
+                auto url = sourceResource->url;
                 status.requiredResourceCountIsPrecise = false;
                 status.requiredResourceCount++;
                 requiredSourceURLs.insert(url);
 
-                auto sourceResource = Resource::source(url);
-                sourceResource.setPriority(Resource::Priority::Low);
-                sourceResource.setUsage(Resource::Usage::Offline);
+                sourceResource->setPriority(Resource::Priority::Low);
+                sourceResource->setUsage(Resource::Usage::Offline);
 
                 ensureResource(
-                    std::move(sourceResource),
-                    [=, source = std::shared_ptr<Source>(std::move(source))](const Response& sourceResponse) {
+                    std::move(*sourceResource),
+                    [this, source = std::shared_ptr<Source>(std::move(source)), url = std::move(url)](
+                        const Response& sourceResponse) {
                         style::conversion::Error error;
-                        optional<Tileset> tileset =
-                            style::conversion::convertJSON<Tileset>(*sourceResponse.data, error);
-                        if (tileset) {
-                            util::mapbox::canonicalizeTileset(*tileset, url, *source);
-                            queueTiles(*source, *tileset);
+                        if (auto tset = style::conversion::convertJSON<Tileset>(*sourceResponse.data, error)) {
+                            util::mapbox::canonicalizeTileset(*tset, url, *source);
+                            queueTiles(*source, *tset);
 
                             requiredSourceURLs.erase(url);
                             if (requiredSourceURLs.empty()) {
@@ -233,13 +235,14 @@ void OfflineDownload::activateDownload() {
                             }
                         }
                     });
+            } else {
+                assert(false);
             }
         };
 
         for (auto& source : parser.sources) {
-            auto urlOrTileSet = source->getURLOrTileset();
-            if (urlOrTileSet) {
-                handleTiledSource(std::move(source), *urlOrTileSet);
+            if (source->getTypeInfo()->tileSet == SourceTypeInfo::TileSet::Yes) {
+                handleTiledSource(std::move(source));
             } else if (auto resource = source->getResource()) {
                 queueResource(std::move(*resource));
             }

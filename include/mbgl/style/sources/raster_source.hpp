@@ -15,7 +15,8 @@ public:
     RasterSource(std::string id, variant<std::string, Tileset> urlOrTileset, uint16_t tileSize);
     ~RasterSource() override;
 
-    const variant<std::string, Tileset>* getURLOrTileset() const final;
+    const Tileset* getTileset() const final;
+    optional<Resource> getResource() const final;
     optional<std::string> getURL() const;
 
     class Impl;

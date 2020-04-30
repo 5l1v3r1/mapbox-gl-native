@@ -29,10 +29,9 @@ static std::string tilesetDEMEncodingToString(mbgl::Tileset::DEMEncoding encodin
 
 Value RasterDEMSource::serialize() const {
     auto value = RasterSource::serialize();
-    getURLOrTileset()->match([](const std::string&) {},
-                             [&](const mbgl::Tileset& tileset) {
-                                 value.getObject()->insert({"encoding", tilesetDEMEncodingToString(tileset.encoding)});
-                             });
+    if (auto* tileset = getTileset()) {
+        value.getObject()->insert({"encoding", tilesetDEMEncodingToString(tileset->encoding)});
+    }
     return value;
 }
 
