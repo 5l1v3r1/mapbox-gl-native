@@ -20,7 +20,7 @@ public:
     void setURL(const std::string& url);
     void setImage(PremultipliedImage&&);
     void setSourceData(SourceData) override;
-    SourceDataResult getSourceData() const override;
+    optional<Resource> getResource() const override;
 
     void setCoordinates(const std::array<LatLng, 4>&);
     std::array<LatLng, 4> getCoordinates() const;

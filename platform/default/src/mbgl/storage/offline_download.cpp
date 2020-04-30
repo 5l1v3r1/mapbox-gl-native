@@ -169,7 +169,7 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
         auto urlOrTileSet = source->getURLOrTileset();
         if (urlOrTileSet) {
             handleTiledSource(*urlOrTileSet);
-        } else if (source->getSourceData().url) {
+        } else if (source->getResource()) {
             result->requiredResourceCount += 1;
         }
     }
@@ -240,13 +240,8 @@ void OfflineDownload::activateDownload() {
             auto urlOrTileSet = source->getURLOrTileset();
             if (urlOrTileSet) {
                 handleTiledSource(std::move(source), *urlOrTileSet);
-            } else {
-                auto sourceData = source->getSourceData();
-                if (sourceData.url && source->getTypeInfo() == ImageSource::Impl::staticTypeInfo()) {
-                    queueResource(Resource::image(*sourceData.url));
-                } else if (sourceData.url && source->getTypeInfo() == GeoJSONSource::Impl::staticTypeInfo()) {
-                    queueResource(Resource::source(*sourceData.url));
-                }
+            } else if (auto resource = source->getResource()) {
+                queueResource(std::move(*resource));
             }
         }
 

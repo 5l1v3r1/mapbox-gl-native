@@ -71,12 +71,14 @@ void GeoJSONSource::setSourceData(SourceData data) {
     }
 }
 
-SourceDataResult GeoJSONSource::getSourceData() const {
-    SourceDataResult result{impl().getData()};
-    if (url) {
-        result.url = &*url;
-    }
-    return result;
+optional<Resource> GeoJSONSource::getResource() const {
+    if (!url) return nullopt;
+    return Resource::source(*url);
+}
+
+const GeoJSONData* GeoJSONSource::getGeoJSONData() const {
+    auto data = impl().getData().lock();
+    return data.get();
 }
 
 optional<std::string> GeoJSONSource::getURL() const {

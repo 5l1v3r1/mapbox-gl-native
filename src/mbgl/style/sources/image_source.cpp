@@ -58,18 +58,9 @@ void ImageSource::setSourceData(SourceData data) {
     }
 }
 
-SourceDataResult ImageSource::getSourceData() const {
-    SourceDataResult result{};
-    if (url) {
-        result.url = &*url;
-    }
-
-    auto image = impl().getImage();
-    if (image) {
-        result.image = image;
-    }
-
-    return result;
+optional<Resource> ImageSource::getResource() const {
+    if (!url) return nullopt;
+    return Resource::image(*url);
 }
 
 optional<std::string> ImageSource::getURL() const {

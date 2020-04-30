@@ -2,6 +2,7 @@
 
 #include <mapbox/std/weak.hpp>
 #include <mapbox/util/type_wrapper.hpp>
+#include <mbgl/storage/resource.hpp>
 #include <mbgl/style/source_data.hpp>
 #include <mbgl/style/source_parameters.hpp>
 #include <mbgl/style/types.hpp>
@@ -94,10 +95,21 @@ public:
 
     virtual void setSourceData(SourceData) {}
 
-    virtual SourceDataResult getSourceData() const { return {}; }
-
+    /**
+     * @brief Returns resource for loading, if required by this source; returns `nullopt` otherwise.
+     *
+     * @return optional<Resource>
+     */
+    virtual optional<Resource> getResource() const { return nullopt; }
+    // TODO: Convert below to
+    // `virtual const Tileset* getTileset() const;`
     virtual const variant<std::string, Tileset>* getURLOrTileset() const { return nullptr; }
-
+    /**
+     * @brief Returns the GeoJSON data, if this source supports GeoJSON format; returns `nullptr` otherwise.
+     *
+     * @return const GeoJSONData*
+     */
+    virtual const GeoJSONData* getGeoJSONData() const { return nullptr; }
     virtual void setSourceParameters(SourceParameters) {}
 
     virtual void invalidateTile(const CanonicalTileID&) {}

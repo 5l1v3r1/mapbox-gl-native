@@ -24,16 +24,5 @@ struct SourceData {
     std::shared_ptr<GeoJSONData> geoJSONData;
 };
 
-struct SourceDataResult {
-    SourceDataResult() = default;
-    explicit SourceDataResult(const std::string& url_) : url(&url_) {}
-    explicit SourceDataResult(std::weak_ptr<PremultipliedImage>& image_) : image(std::move(image_)) {}
-    explicit SourceDataResult(std::weak_ptr<GeoJSONData> data) : geoJSONData(std::move(data)) {}
-
-    const std::string* url = nullptr;
-    std::weak_ptr<const PremultipliedImage> image;
-    std::weak_ptr<const GeoJSONData> geoJSONData;
-};
-
 } // namespace style
 } // namespace mbgl
