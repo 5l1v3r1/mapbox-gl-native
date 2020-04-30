@@ -14,6 +14,13 @@
 
 ### 🐞 Bug fixes
 
+### ✨ New features
+- [core] Source modularization
+  
+  Sources are now managed by a SourceManager and Sources can register themselves by adding a SourceFactory.
+  This allows for selection of sources at build time, reducing the binary size or extension with additional
+  source types.
+
 - [core][tile mode] Labels priority fixes ([#16432](https://github.com/mapbox/mapbox-gl-native/pull/16432))
 
   This change does the following:
