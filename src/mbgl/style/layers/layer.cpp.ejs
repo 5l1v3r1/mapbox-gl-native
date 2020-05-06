@@ -335,7 +335,7 @@ optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::strin
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty <%- camelize(type) %>Layer::getProperty(const std::string& name) const {
+StyleProperty <%- camelize(type) %>Layer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

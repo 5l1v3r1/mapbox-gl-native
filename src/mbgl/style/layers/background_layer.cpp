@@ -274,7 +274,7 @@ optional<Error> BackgroundLayer::setPropertyInternal(const std::string& name, co
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty BackgroundLayer::getProperty(const std::string& name) const {
+StyleProperty BackgroundLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

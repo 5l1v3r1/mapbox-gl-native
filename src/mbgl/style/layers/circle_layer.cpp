@@ -680,7 +680,7 @@ optional<Error> CircleLayer::setPropertyInternal(const std::string& name, const 
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty CircleLayer::getProperty(const std::string& name) const {
+StyleProperty CircleLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

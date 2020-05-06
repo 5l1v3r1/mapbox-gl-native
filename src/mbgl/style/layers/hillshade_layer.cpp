@@ -414,7 +414,7 @@ optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name, con
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty HillshadeLayer::getProperty(const std::string& name) const {
+StyleProperty HillshadeLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

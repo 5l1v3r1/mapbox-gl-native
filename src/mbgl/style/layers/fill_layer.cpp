@@ -498,7 +498,7 @@ optional<Error> FillLayer::setPropertyInternal(const std::string& name, const Co
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty FillLayer::getProperty(const std::string& name) const {
+StyleProperty FillLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

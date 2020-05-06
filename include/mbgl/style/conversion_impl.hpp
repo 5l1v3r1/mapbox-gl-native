@@ -349,17 +349,23 @@ Value makeValue(T&& arg) {
 }
 
 template <typename T>
+inline StyleProperty makeConstantStyleProperty(T&& value) {
+    return {makeValue(std::forward<T>(value)), StyleProperty::Kind::Constant};
+}
+
+template <typename T>
+inline StyleProperty makeExpressionStyleProperty(T&& value) {
+    return {makeValue(std::forward<T>(value)), StyleProperty::Kind::Expression};
+}
+
+template <typename T>
 StyleProperty makeStyleProperty(const PropertyValue<T>& value) {
     return value.match([](const Undefined&) -> StyleProperty { return {}; },
-                       [](const Color& c) -> StyleProperty {
-                           return {makeValue(c), StyleProperty::Kind::Expression};
-                       },
+                       [](const Color& c) -> StyleProperty { return makeExpressionStyleProperty(c); },
                        [](const PropertyExpression<T>& fn) -> StyleProperty {
-                           return {fn.getExpression().serialize(), StyleProperty::Kind::Expression};
+                           return makeExpressionStyleProperty(fn.getExpression());
                        },
-                       [](const auto& t) -> StyleProperty {
-                           return {makeValue(t), StyleProperty::Kind::Constant};
-                       });
+                       [](const auto& t) -> StyleProperty { return makeConstantStyleProperty(t); });
 }
 
 inline StyleProperty makeStyleProperty(const TransitionOptions& value) {
@@ -369,7 +375,7 @@ inline StyleProperty makeStyleProperty(const TransitionOptions& value) {
 
 inline StyleProperty makeStyleProperty(const ColorRampPropertyValue& value) {
     if (value.isUndefined()) return {};
-    return {makeValue(value), StyleProperty::Kind::Expression};
+    return makeExpressionStyleProperty(value);
 }
 
 } // namespace conversion

@@ -680,7 +680,7 @@ optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::string& n
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty LocationIndicatorLayer::getProperty(const std::string& name) const {
+StyleProperty LocationIndicatorLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

@@ -370,7 +370,7 @@ optional<Error> HeatmapLayer::setPropertyInternal(const std::string& name, const
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty HeatmapLayer::getProperty(const std::string& name) const {
+StyleProperty HeatmapLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

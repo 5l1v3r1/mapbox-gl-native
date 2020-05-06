@@ -42,7 +42,7 @@ optional<Error> CustomLayer::setPropertyInternal(const std::string&, const Conve
     return Error { "layer doesn't support this property" };
 }
 
-StyleProperty CustomLayer::getProperty(const std::string&) const {
+StyleProperty CustomLayer::getPropertyInternal(const std::string&) const {
     return {};
 }
 

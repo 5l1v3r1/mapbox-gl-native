@@ -796,7 +796,7 @@ optional<Error> LineLayer::setPropertyInternal(const std::string& name, const Co
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty LineLayer::getProperty(const std::string& name) const {
+StyleProperty LineLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

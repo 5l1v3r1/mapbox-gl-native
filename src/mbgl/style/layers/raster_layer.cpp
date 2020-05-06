@@ -499,7 +499,7 @@ optional<Error> RasterLayer::setPropertyInternal(const std::string& name, const 
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty RasterLayer::getProperty(const std::string& name) const {
+StyleProperty RasterLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

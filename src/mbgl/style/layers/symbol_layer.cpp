@@ -1871,7 +1871,7 @@ optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, const 
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty SymbolLayer::getProperty(const std::string& name) const {
+StyleProperty SymbolLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

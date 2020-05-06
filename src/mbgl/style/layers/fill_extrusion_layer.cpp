@@ -521,7 +521,7 @@ optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name,
     return Error{"layer doesn't support this property"};
 }
 
-StyleProperty FillExtrusionLayer::getProperty(const std::string& name) const {
+StyleProperty FillExtrusionLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 

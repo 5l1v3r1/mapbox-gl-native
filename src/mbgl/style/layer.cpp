@@ -203,6 +203,32 @@ optional<conversion::Error> Layer::setProperty(const std::string& name, const co
     return error;
 }
 
+StyleProperty Layer::getProperty(const std::string& name) const {
+    using namespace conversion;
+    if (name == "visibility") {
+        return makeConstantStyleProperty(getVisibility());
+    }
+    if (name == "minzoom") {
+        return makeConstantStyleProperty(getMinZoom());
+    }
+    if (name == "maxzoom") {
+        return makeConstantStyleProperty(getMaxZoom());
+    }
+    if (name == "filter") {
+        return makeExpressionStyleProperty(getFilter());
+    }
+    if (name == "source-layer") {
+        return makeConstantStyleProperty(getSourceLayer());
+    }
+    if (name == "source") {
+        return makeConstantStyleProperty(getSourceID());
+    }
+    if (name == "type") {
+        return makeConstantStyleProperty(getTypeInfo()->type);
+    }
+    return getPropertyInternal(name);
+}
+
 optional<conversion::Error> Layer::setVisibility(const conversion::Convertible& value) {
     using namespace conversion;
 
