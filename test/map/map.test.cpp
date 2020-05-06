@@ -1027,6 +1027,24 @@ TEST(Map, Issue15342) {
     test.runLoop.run();
 }
 
+namespace {
+
+void checkConstProperty(Layer* layer, const std::string& propertyName, const std::string& expected) {
+    StyleProperty property = layer->getProperty(propertyName);
+    ASSERT_TRUE(property.getValue());
+    EXPECT_EQ(StyleProperty::Kind::Constant, property.getKind());
+    EXPECT_EQ(expected, *property.getValue().getString());
+}
+
+void checkConstProperty(Layer* layer, const std::string& propertyName, double expected) {
+    StyleProperty property = layer->getProperty(propertyName);
+    ASSERT_TRUE(property.getValue());
+    EXPECT_EQ(StyleProperty::Kind::Constant, property.getKind());
+    EXPECT_EQ(expected, *property.getValue().getDouble());
+}
+
+} // namespace
+
 TEST(Map, UniversalStyleGetter) {
     MapTest<> test;
 
@@ -1041,6 +1059,12 @@ TEST(Map, UniversalStyleGetter) {
             "id": "line",
             "type": "line",
             "source": "mapbox",
+            "source-layer": "road",
+            "minzoom": 11,
+            "maxzoom": 16,
+            "filter": [ 
+                "all", [ "==", "class", "street" ], [ "==", "structure", "tunnel" ]
+            ],
             "paint": {
                 "line-color": "red",
                 "line-opacity": 0.5,
@@ -1062,6 +1086,22 @@ TEST(Map, UniversalStyleGetter) {
     StyleProperty nonexistent = lineLayer->getProperty("nonexistent");
     ASSERT_FALSE(nonexistent.getValue());
     EXPECT_EQ(StyleProperty::Kind::Undefined, nonexistent.getKind());
+
+    checkConstProperty(lineLayer, "visibility", "visible");
+    checkConstProperty(lineLayer, "source", "mapbox");
+    checkConstProperty(lineLayer, "source-layer", "road");
+    checkConstProperty(lineLayer, "type", "line");
+    checkConstProperty(lineLayer, "minzoom", 11);
+    checkConstProperty(lineLayer, "maxzoom", 16);
+
+    StyleProperty filter = lineLayer->getProperty("filter");
+    ASSERT_TRUE(filter.getValue());
+    EXPECT_EQ(StyleProperty::Kind::Expression, filter.getKind());
+    ASSERT_TRUE(filter.getValue().getArray());
+    const auto& filterExpression = *filter.getValue().getArray();
+    EXPECT_EQ(3u, filterExpression.size());
+    ASSERT_TRUE(filterExpression[0].getString());
+    EXPECT_EQ("all", *filterExpression[0].getString());
 
     StyleProperty undefined = lineLayer->getProperty("line-blur");
     ASSERT_FALSE(undefined.getValue());
