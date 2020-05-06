@@ -70,7 +70,7 @@ struct SourceTypeInfo {
  *
  *     auto vectorSource = std::make_unique<VectorSource>("my-vector-source");
  */
-class Source {
+class Source : public Serializable {
 public:
     Source(const Source&) = delete;
     Source& operator=(const Source&) = delete;
@@ -168,7 +168,7 @@ public:
 
     const SourceTypeInfo* getTypeInfo() const noexcept;
 
-    virtual Value serialize() const;
+    Value serialize() const override;
 
 protected:
     explicit Source(Immutable<Impl>);

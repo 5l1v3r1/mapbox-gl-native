@@ -5,6 +5,7 @@
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/immutable.hpp>
 #include <mbgl/util/optional.hpp>
+#include <mbgl/util/serializable.hpp>
 
 #include <mapbox/std/weak.hpp>
 #include <mapbox/util/type_wrapper.hpp>
@@ -82,7 +83,7 @@ struct LayerTypeInfo {
  *
  *     auto circleLayer = LayerManager::get()->createLayer("circle", ...);
  */
-class Layer {
+class Layer : public Serializable {
 public:
     Layer(const Layer& ) = delete;
     Layer& operator=(const Layer&) = delete;
@@ -114,7 +115,7 @@ public:
     optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
 
     virtual StyleProperty getProperty(const std::string&) const = 0;
-    virtual Value serialize() const;
+    Value serialize() const override;
 
     // Private implementation
     // TODO : We should not have public mutable data members.

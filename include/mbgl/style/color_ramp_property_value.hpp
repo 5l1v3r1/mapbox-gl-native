@@ -1,8 +1,9 @@
 #pragma once
 
-#include <mbgl/util/variant.hpp>
-#include <mbgl/style/undefined.hpp>
 #include <mbgl/style/expression/expression.hpp>
+#include <mbgl/style/undefined.hpp>
+#include <mbgl/util/serializable.hpp>
+#include <mbgl/util/variant.hpp>
 
 namespace mbgl {
 namespace style {
@@ -11,7 +12,7 @@ namespace style {
  * Special-case implementation of (a subset of) the PropertyValue<T> interface
  * used for building the HeatmapColor paint property traits class.
  */
-class ColorRampPropertyValue {
+class ColorRampPropertyValue : public Serializable {
 private:
     std::shared_ptr<expression::Expression> value;
 
@@ -42,8 +43,8 @@ public:
     bool hasDataDrivenPropertyDifference(const ColorRampPropertyValue&) const { return false; }
 
     const expression::Expression& getExpression() const { return *value; }
+    Value serialize() const final { return value->serialize(); }
 };
-
 
 } // namespace style
 } // namespace mbgl

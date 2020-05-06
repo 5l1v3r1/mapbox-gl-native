@@ -2,13 +2,12 @@
 
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/optional.hpp>
-
-#include <mapbox/compatibility/value.hpp>
+#include <mbgl/util/serializable.hpp>
 
 namespace mbgl {
 namespace style {
 
-class TransitionOptions {
+class TransitionOptions : public Serializable {
 public:
     optional<Duration> duration;
     optional<Duration> delay;
@@ -33,7 +32,7 @@ public:
         return duration || delay;
     }
 
-    mapbox::base::Value serialize() const {
+    mapbox::base::Value serialize() const final {
         mapbox::base::ValueObject result;
         if (duration) {
             result.emplace("duration", std::chrono::duration_cast<std::chrono::milliseconds>(*duration).count());

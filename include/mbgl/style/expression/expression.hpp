@@ -173,7 +173,7 @@ enum class Kind : int32_t {
     Distance
 };
 
-class Expression {
+class Expression : public Serializable {
 public:
     Expression(Kind kind_, type::Type type_) : kind(kind_), type(std::move(type_)) {}
     virtual ~Expression() = default;
@@ -206,8 +206,8 @@ public:
      * complete set of outputs is statically undecidable.
      */
     virtual std::vector<optional<Value>> possibleOutputs() const = 0;
-    
-    virtual mbgl::Value serialize() const {
+
+    mbgl::Value serialize() const override {
         std::vector<mbgl::Value> serialized;
         serialized.emplace_back(getOperator());
         eachChild([&](const Expression &child) {
@@ -215,7 +215,7 @@ public:
         });
         return serialized;
     };
-    
+
     virtual std::string getOperator() const = 0;
 
 protected:

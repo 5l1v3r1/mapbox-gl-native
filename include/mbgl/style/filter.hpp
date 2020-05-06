@@ -12,7 +12,7 @@
 namespace mbgl {
 namespace style {
 
-class Filter {
+class Filter : public Serializable {
 public:
     optional<std::shared_ptr<const expression::Expression>> expression;
 private:
@@ -41,14 +41,10 @@ public:
     friend bool operator!=(const Filter& lhs, const Filter& rhs) {
         return !(lhs == rhs);
     }
-    
-    mbgl::Value serialize() const {
-        if (legacyFilter) {
-            return *legacyFilter;
-        }
-        else if (expression) {
-            return (**expression).serialize();
-        }
+
+    mbgl::Value serialize() const final {
+        if (legacyFilter) return *legacyFilter;
+        if (expression) return (**expression).serialize();
         return NullValue();
     }
 };

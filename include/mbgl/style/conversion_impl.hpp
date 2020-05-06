@@ -10,6 +10,7 @@
 #include <mbgl/util/feature.hpp>
 #include <mbgl/util/geojson.hpp>
 #include <mbgl/util/optional.hpp>
+#include <mbgl/util/serializable.hpp>
 #include <mbgl/util/traits.hpp>
 
 #include <mapbox/compatibility/value.hpp>
@@ -301,23 +302,15 @@ optional<T> convert(const Convertible& value, Error& error, Args&&...args) {
     return Converter<T>()(value, error, std::forward<Args>(args)...);
 }
 
-template <>
-struct ValueFactory<ColorRampPropertyValue> {
-    static Value make(const ColorRampPropertyValue& value) { return value.getExpression().serialize(); }
-};
-
-template <>
-struct ValueFactory<TransitionOptions> {
-    static Value make(const TransitionOptions& value) { return value.serialize(); }
-};
-
-template <>
-struct ValueFactory<Color> {
-    static Value make(const Color& color) { return color.serialize(); }
+template <typename T>
+struct ValueFactory<T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type> {
+    static Value make(const Serializable& value) { return value.serialize(); }
 };
 
 template <typename T>
-struct ValueFactory<T, typename std::enable_if<(!std::is_enum<T>::value && !is_linear_container<T>::value)>::type> {
+struct ValueFactory<T,
+                    typename std::enable_if<(!std::is_enum<T>::value && !is_linear_container<T>::value &&
+                                             !std::is_base_of<Serializable, T>::value)>::type> {
     static Value make(const T& arg) { return {arg}; }
 };
 
