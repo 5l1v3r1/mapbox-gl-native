@@ -11,13 +11,10 @@ std::unique_ptr<style::Source> SourceManager::createSource(const std::string& ty
                                                            const std::string& id,
                                                            const style::conversion::Convertible& value,
                                                            style::conversion::Error& error) noexcept {
-    SourceFactory* factory = getFactory(type);
-    if (factory) {
+    if (SourceFactory* factory = getFactory(type)) {
         return factory->createSource(id, value, error);
-    } else {
-        error.message = "Null factory for type: " + type;
     }
-    error.message = "Unsupported source type! " + error.message;
+    error.message = "Unsupported source type: " + type;
     return nullptr;
 }
 

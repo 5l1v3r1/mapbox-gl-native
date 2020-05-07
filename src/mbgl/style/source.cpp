@@ -1,3 +1,5 @@
+#include <mbgl/style/conversion/constant.hpp>
+#include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/source_impl.hpp>
 #include <mbgl/style/source_observer.hpp>
@@ -82,6 +84,52 @@ void Source::dumpDebugLogs() const {
     Log::Info(Event::General, "Source::loaded: %d", loaded);
 }
 
+optional<conversion::Error> Source::setProperty(const std::string& name, const conversion::Convertible& value) {
+    using namespace conversion;
+    optional<Error> error = setPropertyInternal(name, value);
+    if (!error) return error; // Successfully set by the derived class implementation.
+    if (name == "volatile") {
+        if (auto isVolatile = convert<bool>(value, *error)) {
+            setVolatile(*isVolatile);
+            return nullopt;
+        }
+    } else if (name == "prefetch-zoom-delta") {
+        if (auto zoomDelta = convert<float>(value, *error)) {
+            setPrefetchZoomDelta(static_cast<uint8_t>(*zoomDelta));
+            return nullopt;
+        }
+    } else if (name == "max-overscale-factor-for-parent-tiles") {
+        if (auto zoomDelta = convert<float>(value, *error)) {
+            setMaxOverscaleFactorForParentTiles(static_cast<uint8_t>(*zoomDelta));
+            return nullopt;
+        }
+    } else if (name == "minimum-tile-update-interval") {
+        if (auto updateInterval = convert<float>(value, *error)) {
+            std::chrono::duration<float> seconds(*updateInterval);
+            setMinimumTileUpdateInterval(std::chrono::duration_cast<Duration>(seconds));
+            return nullopt;
+        }
+    }
+    return error;
+}
+
+Value Source::getProperty(const std::string& name) const {
+    using namespace conversion;
+    if (name == "type") return makeValue(getTypeInfo()->type);
+    if (name == "volatile") return makeValue(isVolatile());
+    if (name == "attribution") return makeValue(getAttribution());
+    if (name == "tile-size") return makeValue(getTileSize());
+    if (name == "prefetch-zoom-delta") return makeValue(getPrefetchZoomDelta());
+    if (name == "max-overscale-factor-for-parent-tiles") {
+        return makeValue(getMaxOverscaleFactorForParentTiles());
+    }
+    if (name == "minimum-tile-update-interval") {
+        auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(getMinimumTileUpdateInterval());
+        return makeValue(seconds.count());
+    }
+    return getPropertyInternal(name);
+}
+
 const SourceTypeInfo* Source::getTypeInfo() const noexcept {
     return baseImpl->getTypeInfo();
 }
@@ -111,7 +159,7 @@ void Source::serializeTileSet(Value& value, const mbgl::Tileset& tileset) const 
     tiles.reserve(tileset.tiles.size());
     for (const auto& tile : tileset.tiles) tiles.emplace_back(tile);
 
-    json->insert({"tiles", tiles});
+    json->insert({"tiles", std::move(tiles)});
     json->insert({"minzoom", tileset.zoomRange.min});
     json->insert({"maxzoom", tileset.zoomRange.max});
     json->insert({"scheme", tilesetSchemeToString(tileset.scheme)});
@@ -137,6 +185,14 @@ void Source::serializeUrlOrTileSet(Value& value, const mbgl::variant<std::string
 
 uint16_t Source::getTileSize() const {
     return baseImpl->getTileSize();
+}
+
+optional<conversion::Error> Source::setPropertyInternal(const std::string& name, const conversion::Convertible&) {
+    return conversion::Error{"Cannot set property " + name + " for the source " + baseImpl->id};
+}
+
+Value Source::getPropertyInternal(const std::string&) const {
+    return NullValue();
 }
 
 } // namespace style

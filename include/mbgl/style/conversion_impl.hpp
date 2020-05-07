@@ -311,7 +311,7 @@ template <typename T>
 struct ValueFactory<T,
                     typename std::enable_if<(!std::is_enum<T>::value && !is_linear_container<T>::value &&
                                              !std::is_base_of<Serializable, T>::value)>::type> {
-    static Value make(const T& arg) { return {arg}; }
+    static Value make(T arg) { return {std::move(arg)}; }
 };
 
 template <typename T>
@@ -346,6 +346,12 @@ struct ValueFactory<Rotation> {
 template <typename T>
 Value makeValue(T&& arg) {
     return ValueFactory<std::decay_t<T>>::make(std::forward<T>(arg));
+}
+
+template <typename T>
+Value makeValue(optional<T> arg) {
+    if (!arg) return NullValue();
+    return makeValue(std::move(*arg));
 }
 
 template <typename T>

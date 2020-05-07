@@ -31,11 +31,8 @@ optional<std::unique_ptr<Source>> Converter<std::unique_ptr<Source>>::operator()
     const std::string& tname = type.value();
 
     auto source = SourceManager::get()->createSource(tname, id, value, error);
-    if (source) {
-        return source;
-    } else {
-        return nullopt;
-    }
+    if (!source) return nullopt;
+    return source;
 }
 
 } // namespace conversion

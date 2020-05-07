@@ -164,8 +164,10 @@ public:
     // identical platform-native peers.
     mapbox::base::TypeWrapper peer;
 
-    virtual mapbox::base::WeakPtr<Source> makeWeakPtr() = 0;
+    optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
+    Value getProperty(const std::string&) const;
 
+    virtual mapbox::base::WeakPtr<Source> makeWeakPtr() = 0;
     const SourceTypeInfo* getTypeInfo() const noexcept;
 
     Value serialize() const override;
@@ -177,6 +179,9 @@ protected:
     void serializeTileSet(Value&, const mbgl::Tileset&) const;
 
     virtual Mutable<Impl> createMutable() const noexcept = 0;
+    virtual optional<conversion::Error> setPropertyInternal(const std::string& name,
+                                                            const conversion::Convertible& value);
+    virtual Value getPropertyInternal(const std::string&) const;
 };
 
 } // namespace style
