@@ -97,13 +97,13 @@ vec3 Camera::getPosition() const {
     return {{p[0], p[1], p[2]}};
 }
 
-mat4 Camera::getCameraToWorld(double scale, bool flippedY) const {
+mat4 Camera::getCameraToWorld(double scale, bool flippedY, double pixelsPerMeter) const {
     mat4 cameraToWorld;
-    matrix::invert(cameraToWorld, getWorldToCamera(scale, flippedY));
+    matrix::invert(cameraToWorld, getWorldToCamera(scale, flippedY, pixelsPerMeter));
     return cameraToWorld;
 }
 
-mat4 Camera::getWorldToCamera(double scale, bool flippedY) const {
+mat4 Camera::getWorldToCamera(double scale, bool flippedY, double pixelsPerMeter) const {
     // transformation chain from world space to camera space:
     // 1. Height value (z) of renderables is in meters. Scale z coordinate by pixelsPerMeter
     // 2. Transform from pixel coordinates to camera space with cameraMatrix^-1
@@ -112,8 +112,6 @@ mat4 Camera::getWorldToCamera(double scale, bool flippedY) const {
     // worldToCamera: flip * cam^-1 * zScale
     // cameraToWorld: (flip * cam^-1 * zScale)^-1 => (zScale^-1 * cam * flip^-1)
     const double worldSize = Projection::worldSize(scale);
-    const double latitude = latFromMercatorY(getColumn(transform, 3)[1]);
-    const double pixelsPerMeter = worldSize / (std::cos(latitude * util::DEG2RAD) * util::M2PI * util::EARTH_RADIUS_M);
 
     // Compute inverse of the camera matrix
     mat4 result = orientation.conjugate().toRotationMatrix();
