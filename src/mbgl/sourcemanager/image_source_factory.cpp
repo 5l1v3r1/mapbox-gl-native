@@ -32,23 +32,13 @@ std::unique_ptr<style::Source> ImageSourceFactory::createSource(const std::strin
         return nullptr;
     }
 
-    if (!isArray(*coordinatesValue) || arrayLength(*coordinatesValue) != 4) {
-        error.message = "Image coordinates must be an array of four longitude latitude pairs";
-        return nullptr;
-    }
+    auto coordinates = style::conversion::convert<std::array<LatLng, 4>>(*coordinatesValue, error);
+    if (!coordinates) return nullptr;
 
-    std::array<LatLng, 4> coordinates;
-    for (std::size_t i = 0; i < 4; i++) {
-        auto latLng = style::conversion::convert<LatLng>(arrayMember(*coordinatesValue, i), error);
-        if (!latLng) {
-            return nullptr;
-        }
-        coordinates[i] = *latLng;
-    }
-    auto result = std::make_unique<style::ImageSource>(id, coordinates);
+    auto result = std::make_unique<style::ImageSource>(id, *coordinates);
     result->setURL(*urlString);
 
-    return {std::move(result)};
+    return result;
 }
 
 std::unique_ptr<RenderSource> ImageSourceFactory::createRenderSource(Immutable<style::Source::Impl> impl) noexcept {

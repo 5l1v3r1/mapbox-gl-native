@@ -352,6 +352,14 @@ struct ValueFactory<LatLngBounds> {
     }
 };
 
+template <>
+struct ValueFactory<LatLng> {
+    static Value make(const LatLng& coordinate) {
+        std::vector<mapbox::base::Value> value{coordinate.longitude(), coordinate.latitude()};
+        return value;
+    }
+};
+
 template <typename T>
 Value makeValue(T&& arg) {
     return ValueFactory<std::decay_t<T>>::make(std::forward<T>(arg));

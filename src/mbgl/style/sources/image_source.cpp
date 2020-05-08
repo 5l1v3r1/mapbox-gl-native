@@ -1,4 +1,7 @@
 #include <mbgl/storage/file_source.hpp>
+#include <mbgl/style/conversion/constant.hpp>
+#include <mbgl/style/conversion/coordinate.hpp>
+#include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/source_observer.hpp>
 #include <mbgl/style/sources/image_source.hpp>
@@ -105,22 +108,39 @@ Mutable<Source::Impl> ImageSource::createMutable() const noexcept {
 }
 
 Value ImageSource::serialize() const {
+    using namespace conversion;
     auto value = Source::serialize();
     assert(value.getObject());
     auto object = value.getObject();
-
     if (url) object->insert({"url", url.value()});
-
-    const auto source_coordinates = getCoordinates();
-    std::vector<mapbox::base::Value> coordinates;
-    coordinates.reserve(source_coordinates.size());
-
-    for (const auto& c : source_coordinates) {
-        coordinates.emplace_back(std::vector<mapbox::base::Value>{c.longitude(), c.latitude()});
-    }
-    object->insert({"coordinates", coordinates});
+    object->insert({"coordinates", makeValue(getCoordinates())});
 
     return value;
+}
+
+optional<conversion::Error> ImageSource::setPropertyInternal(const std::string& name,
+                                                             const conversion::Convertible& value) {
+    using namespace conversion;
+    optional<Error> error;
+    if (name == "url") {
+        if (auto url_ = convert<std::string>(value, *error)) {
+            setURL(*url_);
+            return nullopt;
+        }
+    } else if (name == "coordinates") {
+        if (auto coordinates = convert<std::array<LatLng, 4>>(value, *error)) {
+            setCoordinates(*coordinates);
+            return nullopt;
+        }
+    }
+    return error ? error : Source::setPropertyInternal(name, value);
+}
+
+Value ImageSource::getPropertyInternal(const std::string& name) const {
+    using namespace conversion;
+    if (name == "url" && url) return *url;
+    if (name == "coordinates") return makeValue(getCoordinates());
+    return Value();
 }
 
 } // namespace style

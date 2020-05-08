@@ -4,6 +4,8 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/optional.hpp>
 
+#include <array>
+
 namespace mbgl {
 namespace style {
 namespace conversion {
@@ -12,6 +14,12 @@ template<>
 struct Converter<LatLng> {
 public:
     optional<LatLng> operator() (const Convertible& value, Error& error) const;
+};
+
+template <>
+struct Converter<std::array<LatLng, 4>> {
+public:
+    optional<std::array<LatLng, 4>> operator()(const Convertible& value, Error& error) const;
 };
 
 } // namespace conversion

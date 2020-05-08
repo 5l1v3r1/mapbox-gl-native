@@ -25,6 +25,23 @@ optional<LatLng> Converter<LatLng>::operator() (const Convertible& value, Error&
     return LatLng(*latitude, *longitude);
 }
 
+optional<std::array<LatLng, 4>> Converter<std::array<LatLng, 4>>::operator()(const Convertible& value,
+                                                                             Error& error) const {
+    if (!isArray(value) || arrayLength(value) != 4u) {
+        error.message = "Image coordinates must be an array of four longitude latitude pairs";
+        return nullopt;
+    }
+    std::array<LatLng, 4> coordinates;
+    for (std::size_t i = 0; i < 4u; ++i) {
+        auto latLng = convert<LatLng>(arrayMember(value, i), error);
+        if (!latLng) {
+            return nullopt;
+        }
+        coordinates[i] = *latLng;
+    }
+    return coordinates;
+}
+
 } // namespace conversion
 } // namespace style
 } // namespace mbgl
