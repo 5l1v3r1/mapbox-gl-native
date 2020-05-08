@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/style/source.hpp>
+#include <mbgl/style/sources/tileset_source.hpp>
 #include <mbgl/util/tileset.hpp>
 #include <mbgl/util/variant.hpp>
 
@@ -10,15 +10,11 @@ class AsyncRequest;
 
 namespace style {
 
-class VectorSource final : public Source {
+class VectorSource final : public TilesetSource {
 public:
     VectorSource(std::string id, variant<std::string, Tileset> urlOrTileset, optional<float> maxZoom = nullopt,
                  optional<float> minZoom = nullopt);
     ~VectorSource() final;
-
-    const Tileset* getTileset() const final;
-    optional<Resource> getResource() const final;
-    optional<std::string> getURL() const;
 
     class Impl;
     const Impl& impl() const;
@@ -31,13 +27,10 @@ public:
         return weakFactory.makeWeakPtr();
     }
 
-    Value serialize() const override;
-
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
 private:
-    const variant<std::string, Tileset> urlOrTileset;
     std::unique_ptr<AsyncRequest> req;
     optional<float> maxZoom;
     optional<float> minZoom;

@@ -257,6 +257,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/image_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_dem_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_source.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/tileset_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/vector_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/style.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/style_property.hpp
@@ -714,6 +715,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tileset_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source_impl.hpp

@@ -175,9 +175,6 @@ public:
 protected:
     explicit Source(Immutable<Impl>);
 
-    void serializeUrlOrTileSet(Value&, const variant<std::string, Tileset>&) const;
-    void serializeTileSet(Value&, const mbgl::Tileset&) const;
-
     virtual Mutable<Impl> createMutable() const noexcept = 0;
     virtual optional<conversion::Error> setPropertyInternal(const std::string& name,
                                                             const conversion::Convertible& value);

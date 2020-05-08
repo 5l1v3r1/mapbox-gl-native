@@ -19,8 +19,7 @@ VectorSource::VectorSource(std::string id,
                            variant<std::string, Tileset> urlOrTileset_,
                            optional<float> maxZoom_,
                            optional<float> minZoom_)
-    : Source(makeMutable<Impl>(std::move(id))),
-      urlOrTileset(std::move(urlOrTileset_)),
+    : TilesetSource(makeMutable<Impl>(std::move(id)), std::move(urlOrTileset_)),
       maxZoom(std::move(maxZoom_)),
       minZoom(std::move(minZoom_)) {}
 
@@ -28,29 +27,6 @@ VectorSource::~VectorSource() = default;
 
 const VectorSource::Impl& VectorSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
-}
-
-const Tileset* VectorSource::getTileset() const {
-    if (urlOrTileset.is<Tileset>()) {
-        return &urlOrTileset.get<Tileset>();
-    }
-    return nullptr;
-}
-
-optional<std::string> VectorSource::getURL() const {
-    if (urlOrTileset.is<Tileset>()) {
-        return {};
-    }
-
-    return urlOrTileset.get<std::string>();
-}
-
-optional<Resource> VectorSource::getResource() const {
-    if (urlOrTileset.is<std::string>()) {
-        return Resource::source(urlOrTileset.get<std::string>());
-    }
-
-    return nullopt;
 }
 
 void VectorSource::loadDescription(FileSource& fileSource) {
@@ -107,12 +83,6 @@ bool VectorSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) con
 
 Mutable<Source::Impl> VectorSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
-}
-
-Value VectorSource::serialize() const {
-    auto result = Source::serialize();
-    serializeUrlOrTileSet(result, urlOrTileset);
-    return result;
 }
 
 } // namespace style
