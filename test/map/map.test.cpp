@@ -17,6 +17,7 @@
 #include <mbgl/storage/network_status.hpp>
 #include <mbgl/storage/online_file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layers/background_layer.hpp>
@@ -1029,30 +1030,46 @@ TEST(Map, Issue15342) {
 
 namespace {
 
-void checkConstProperty(Layer* layer, const std::string& propertyName, const std::string& expected) {
+void checkConstProperty(Layer* layer, const std::string& propertyName, const mbgl::Value& expected) {
     StyleProperty property = layer->getProperty(propertyName);
     ASSERT_TRUE(property.getValue());
     EXPECT_EQ(StyleProperty::Kind::Constant, property.getKind());
-    EXPECT_EQ(expected, *property.getValue().getString());
+    EXPECT_EQ(expected, property.getValue()) << propertyName;
 }
 
-void checkConstProperty(Layer* layer, const std::string& propertyName, double expected) {
-    StyleProperty property = layer->getProperty(propertyName);
-    ASSERT_TRUE(property.getValue());
-    EXPECT_EQ(StyleProperty::Kind::Constant, property.getKind());
-    EXPECT_EQ(expected, *property.getValue().getDouble());
+void checkConstProperty(Source* source, const std::string& propertyName, const mbgl::Value& expected) {
+    Value value = source->getProperty(propertyName);
+    EXPECT_EQ(expected, value) << propertyName;
 }
 
 } // namespace
 
 TEST(Map, UniversalStyleGetter) {
     MapTest<> test;
-
     test.map.getStyle().loadJSON(R"STYLE({
         "sources": {
             "mapbox": {
                 "type": "vector",
-                "tiles": ["http://example.com/{z}-{x}-{y}.vector.pbf"]
+                "tiles": ["http://example.com/{z}-{x}-{y}.vector.pbf"],
+                "scheme": "xyz",
+                "minzoom": 11,
+                "maxzoom": 16,
+                "attribution": "mapbox",
+                "bounds": [-180, -73, -120, 73]
+            },
+            "mapbox-streets": {
+                "type": "vector",
+                "url": "http://api.example.com/tilejson.json"
+            },
+            "image": {
+                "type": "image",
+                "url": "https://docs.mapbox.com/mapbox-gl-js/assets/radar.gif",
+                "coordinates": [
+                    [-80.425, 46.437],
+                    [-71.516, 46.437],
+                    [-71.516, 37.936],
+                    [-80.425, 37.936]
+                ]
             }
         },
         "layers": [{
@@ -1080,6 +1097,44 @@ TEST(Map, UniversalStyleGetter) {
         }]
         })STYLE");
 
+    Source* source = test.map.getStyle().getSource("mapbox");
+    ASSERT_TRUE(source);
+    // Generic source properties.
+    checkConstProperty(source, "type", "vector");
+    checkConstProperty(source, "attribution", "mapbox");
+    checkConstProperty(source, "volatile", false);
+    checkConstProperty(source, "minimum-tile-update-interval", 0.0);
+    checkConstProperty(source, "tile-size", 512u);
+    checkConstProperty(source, "prefetch-zoom-delta", NullValue());
+    checkConstProperty(source, "max-overscale-factor-for-parent-tiles", NullValue());
+    // Tileset source properties
+    checkConstProperty(source, "scheme", "xyz");
+    checkConstProperty(source, "url", NullValue());
+    checkConstProperty(source, "tiles", std::vector<Value>{"http://example.com/{z}-{x}-{y}.vector.pbf"});
+    checkConstProperty(source, "minzoom", 11u);
+    checkConstProperty(source, "maxzoom", 16u);
+    std::vector<Value> expectedBounds{-180.0, -73.0, -120.0, 73.0};
+    checkConstProperty(source, "bounds", expectedBounds);
+
+    Source* streetsSource = test.map.getStyle().getSource("mapbox-streets");
+    ASSERT_TRUE(streetsSource);
+    checkConstProperty(streetsSource, "url", "http://api.example.com/tilejson.json");
+    checkConstProperty(streetsSource, "tiles", NullValue());
+    // Image source properties
+    Source* imageSource = test.map.getStyle().getSource("image");
+    ASSERT_TRUE(imageSource);
+    checkConstProperty(imageSource, "url", "https://docs.mapbox.com/mapbox-gl-js/assets/radar.gif");
+    std::vector<Value> expectedCoordinates{
+        std::vector<Value>{-80.425, 46.437},
+        std::vector<Value>{-71.516, 46.437},
+        std::vector<Value>{-71.516, 37.936},
+        std::vector<Value>{-80.425, 37.936}
+    };
+    checkConstProperty(imageSource, "coordinates", expectedCoordinates);
+
+    // Non-existent
+    checkConstProperty(source, "nonexistent", NullValue());
+
     Layer* lineLayer = test.map.getStyle().getLayer("line");
     ASSERT_TRUE(lineLayer);
 
@@ -1091,8 +1146,8 @@ TEST(Map, UniversalStyleGetter) {
     checkConstProperty(lineLayer, "source", "mapbox");
     checkConstProperty(lineLayer, "source-layer", "road");
     checkConstProperty(lineLayer, "type", "line");
-    checkConstProperty(lineLayer, "minzoom", 11);
-    checkConstProperty(lineLayer, "maxzoom", 16);
+    checkConstProperty(lineLayer, "minzoom", 11.0);
+    checkConstProperty(lineLayer, "maxzoom", 16.0);
 
     StyleProperty filter = lineLayer->getProperty("filter");
     ASSERT_TRUE(filter.getValue());
