@@ -132,7 +132,7 @@ TEST(StyleConversion, OverrideDefaults) {
     EXPECT_EQ(2u, roundTrippedObject.at("paint").getObject()->size());
 }
 
-TEST(StyleConversion, SetGenericProperties) {
+TEST(StyleConversion, SetLayerGenericProperties) {
     auto layer = parseLayer(R"JSON({
         "type": "symbol",
         "id": "symbol",

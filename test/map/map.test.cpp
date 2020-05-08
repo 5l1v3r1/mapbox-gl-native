@@ -1124,12 +1124,10 @@ TEST(Map, UniversalStyleGetter) {
     Source* imageSource = test.map.getStyle().getSource("image");
     ASSERT_TRUE(imageSource);
     checkConstProperty(imageSource, "url", "https://docs.mapbox.com/mapbox-gl-js/assets/radar.gif");
-    std::vector<Value> expectedCoordinates{
-        std::vector<Value>{-80.425, 46.437},
-        std::vector<Value>{-71.516, 46.437},
-        std::vector<Value>{-71.516, 37.936},
-        std::vector<Value>{-80.425, 37.936}
-    };
+    std::vector<Value> expectedCoordinates{std::vector<Value>{-80.425, 46.437},
+                                           std::vector<Value>{-71.516, 46.437},
+                                           std::vector<Value>{-71.516, 37.936},
+                                           std::vector<Value>{-80.425, 37.936}};
     checkConstProperty(imageSource, "coordinates", expectedCoordinates);
 
     // Non-existent
