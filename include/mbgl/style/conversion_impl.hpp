@@ -8,6 +8,7 @@
 #include <mbgl/style/rotation.hpp>
 #include <mbgl/style/transition_options.hpp>
 #include <mbgl/util/feature.hpp>
+#include <mbgl/util/geo.hpp>
 #include <mbgl/util/geojson.hpp>
 #include <mbgl/util/optional.hpp>
 #include <mbgl/util/serializable.hpp>
@@ -341,6 +342,14 @@ struct ValueFactory<Position> {
 template <>
 struct ValueFactory<Rotation> {
     static Value make(const Rotation& rotation) { return {rotation.getAngle()}; }
+};
+
+template <>
+struct ValueFactory<LatLngBounds> {
+    static Value make(const LatLngBounds& bounds) {
+        std::vector<mapbox::base::Value> value{bounds.west(), bounds.south(), bounds.east(), bounds.north()};
+        return value;
+    }
 };
 
 template <typename T>

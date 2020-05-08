@@ -2,7 +2,6 @@
 
 #include <mbgl/style/conversion/tileset.hpp>
 #include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/tile/tile.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/enum.hpp>
 
@@ -41,23 +40,13 @@ namespace {
 
 void serializeTileSet(Value& value, const mbgl::Tileset& tileset) {
     assert(value.getObject());
+    using namespace conversion;
     PropertyMap* properties = value.getObject();
-    std::vector<mapbox::base::Value> tiles;
-    tiles.reserve(tileset.tiles.size());
-    for (const auto& tile : tileset.tiles) tiles.emplace_back(tile);
-
-    properties->insert({"tiles", std::move(tiles)});
+    properties->insert({"tiles", makeValue(tileset.tiles)});
     properties->insert({"minzoom", tileset.zoomRange.min});
     properties->insert({"maxzoom", tileset.zoomRange.max});
-    properties->insert({"scheme", conversion::makeValue(tileset.scheme)});
-
-    if (tileset.bounds.has_value()) {
-        properties->insert({"bounds",
-                            std::vector<mapbox::base::Value>{tileset.bounds->southwest().longitude(),
-                                                             tileset.bounds->southwest().latitude(),
-                                                             tileset.bounds->northeast().longitude(),
-                                                             tileset.bounds->northeast().latitude()}});
-    }
+    properties->insert({"scheme", makeValue(tileset.scheme)});
+    properties->insert({"bounds", makeValue(tileset.bounds)});
 }
 
 } // namespace
@@ -71,6 +60,20 @@ Value TilesetSource::serialize() const {
         },
         [&](const mbgl::Tileset& tileset) { serializeTileSet(result, tileset); });
     return result;
+}
+
+Value TilesetSource::getPropertyInternal(const std::string& name) const {
+    using namespace conversion;
+    if (auto* tileset = getTileset()) {
+        if (name == "tiles") return makeValue(tileset->tiles);
+        if (name == "minzoom") return tileset->zoomRange.min;
+        if (name == "maxzoom") return tileset->zoomRange.max;
+        if (name == "scheme") return makeValue(tileset->scheme);
+        if (name == "bounds") return makeValue(tileset->bounds);
+    } else if (auto url = getURL()) {
+        if (name == "url") return makeValue(*url);
+    }
+    return Value();
 }
 
 } // namespace style
