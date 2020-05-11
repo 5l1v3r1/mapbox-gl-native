@@ -24,13 +24,13 @@ class StyleParserTest : public ::testing::TestWithParam<std::string> {};
 
 TEST_P(StyleParserTest, ParseStyle) {
     const std::string base = std::string("test/fixtures/style_parser/") + GetParam();
-
     rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> infoDoc;
     infoDoc.Parse<0>(util::read_file(base + ".info.json").c_str());
     ASSERT_FALSE(infoDoc.HasParseError());
     ASSERT_TRUE(infoDoc.IsObject());
 
     auto observer = new FixtureLogObserver();
+    Log::useLogThread(false);
     Log::setObserver(std::unique_ptr<Log::Observer>(observer));
 
     style::Parser parser;
