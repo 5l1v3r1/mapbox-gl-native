@@ -9,6 +9,18 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
+namespace {
+bool setObjectMember(std::unique_ptr<Source>& source, const Convertible& value, const char* member, Error& error) {
+    if (auto memberValue = objectMember(value, member)) {
+        if (auto error_ = source->setProperty(member, *memberValue)) {
+            error = *error_;
+            return false;
+        }
+    }
+    return true;
+}
+} // namespace
+
 optional<std::unique_ptr<Source>> Converter<std::unique_ptr<Source>>::operator()(const Convertible& value,
                                                                                  Error& error,
                                                                                  const std::string& id) const {
@@ -32,6 +44,7 @@ optional<std::unique_ptr<Source>> Converter<std::unique_ptr<Source>>::operator()
 
     auto source = SourceManager::get()->createSource(tname, id, value, error);
     if (!source) return nullopt;
+    if (!setObjectMember(source, value, "volatile", error)) return nullopt;
     return source;
 }
 

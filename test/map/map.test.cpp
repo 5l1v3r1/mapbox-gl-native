@@ -1059,7 +1059,8 @@ TEST(Map, UniversalStyleGetter) {
             },
             "mapbox-streets": {
                 "type": "vector",
-                "url": "http://api.example.com/tilejson.json"
+                "url": "http://api.example.com/tilejson.json",
+                "volatile": true
             },
             "image": {
                 "type": "image",
@@ -1120,6 +1121,7 @@ TEST(Map, UniversalStyleGetter) {
     ASSERT_TRUE(streetsSource);
     checkConstProperty(streetsSource, "url", "http://api.example.com/tilejson.json");
     checkConstProperty(streetsSource, "tiles", NullValue());
+    checkConstProperty(streetsSource, "volatile", true);
     // Image source properties
     Source* imageSource = test.map.getStyle().getSource("image");
     ASSERT_TRUE(imageSource);
