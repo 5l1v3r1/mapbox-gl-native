@@ -3,6 +3,7 @@ project("Mapbox GL Native" LANGUAGES CXX C)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER Core)
+set(MBGL_BUILD_TYPE "STATIC" CACHE STRING "Default build type.")
 
 set(
     MEMORYCHECK_COMMAND_OPTIONS
@@ -103,7 +104,8 @@ if(MBGL_WITH_QT)
 endif()
 
 add_library(
-    mbgl-core STATIC
+    mbgl-core
+    ${MBGL_BUILD_TYPE}
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor_ref.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/aspiring_actor.hpp
