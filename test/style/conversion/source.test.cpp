@@ -2,6 +2,7 @@
 
 #include <mbgl/style/conversion/json.hpp>
 #include <mbgl/style/conversion/source.hpp>
+#include <mbgl/style/sources/geojson_source.hpp>
 
 using namespace mbgl;
 using namespace mbgl::style;
@@ -17,12 +18,12 @@ std::unique_ptr<Source> parseSource(const std::string& src, const std::string& s
 
 void checkConstProperty(std::unique_ptr<Source>& source, const std::string& propertyName, const mbgl::Value& expected) {
     Value value = source->getProperty(propertyName);
-    EXPECT_EQ(expected, value) << propertyName;
+    EXPECT_EQ(expected, value) << "get property: " << propertyName;
 }
 
 void checkSetProperty(std::unique_ptr<Source>& source, const std::string& propertyName, const JSValue& value) {
     auto error = source->setProperty(propertyName, Convertible(&value));
-    EXPECT_EQ(nullopt, error) << error->message;
+    EXPECT_EQ(nullopt, error) << "set property: " << propertyName << ", error: " << error->message;
 }
 
 } // namespace
@@ -55,4 +56,30 @@ TEST(StyleConversion, SetSourceGenericProperties) {
     checkConstProperty(source, "max-overscale-factor-for-parent-tiles", NullValue());
     checkSetProperty(source, "max-overscale-factor-for-parent-tiles", JSValue(2));
     checkConstProperty(source, "max-overscale-factor-for-parent-tiles", 2u);
+
+    source = parseSource(R"JSON({
+        "type": "geojson",
+        "data": "http://127.0.0.1:3000/geojson.json"
+    })JSON",
+                         "geojson_source");
+    auto* geojsonSource = static_cast<GeoJSONSource*>(source.get());
+    ASSERT_NE(nullptr, source);
+    auto url = geojsonSource->getURL();
+    ASSERT_TRUE(url);
+    EXPECT_EQ("http://127.0.0.1:3000/geojson.json", *url);
+
+    checkSetProperty(source, "data", JSValue("http://127.0.0.1:3000/geojson1.json"));
+    url = geojsonSource->getURL();
+    ASSERT_TRUE(url);
+    EXPECT_EQ("http://127.0.0.1:3000/geojson1.json", *url);
+
+    EXPECT_FALSE(geojsonSource->getGeoJSONData());
+    JSDocument document;
+    document.Parse<0>(R"({
+        "type": "Point",
+        "coordinates": [0, 0]
+    })");
+    const JSValue* geometry = &document;
+    checkSetProperty(source, "data", *geometry);
+    EXPECT_TRUE(geojsonSource->getGeoJSONData());
 }

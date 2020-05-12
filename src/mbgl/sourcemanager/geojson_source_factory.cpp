@@ -27,21 +27,12 @@ std::unique_ptr<style::Source> GeoJSONSourceFactory::createSource(const std::str
     }
 
     auto result = std::make_unique<style::GeoJSONSource>(id, std::move(options));
-
-    if (isObject(*dataValue)) {
-        optional<GeoJSON> geoJSON = style::conversion::convert<GeoJSON>(*dataValue, error);
-        if (!geoJSON) {
-            return nullptr;
-        }
-        result->setGeoJSON(*geoJSON);
-    } else if (toString(*dataValue)) {
-        result->setURL(*toString(*dataValue));
-    } else {
-        error.message = "GeoJSON data must be a URL or an object";
+    if (auto setDataError = result->setProperty("data", *dataValue)) {
+        error = *setDataError;
         return nullptr;
     }
 
-    return {std::move(result)};
+    return result;
 }
 
 std::unique_ptr<RenderSource> GeoJSONSourceFactory::createRenderSource(Immutable<style::Source::Impl> impl) noexcept {

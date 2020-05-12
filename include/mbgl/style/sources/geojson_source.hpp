@@ -83,6 +83,8 @@ public:
     Value serialize() const override;
 
 protected:
+    optional<conversion::Error> setPropertyInternal(const std::string& name,
+                                                    const conversion::Convertible& value) override;
     Mutable<Source::Impl> createMutable() const noexcept final;
 
 private:

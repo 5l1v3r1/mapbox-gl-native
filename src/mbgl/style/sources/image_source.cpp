@@ -121,7 +121,8 @@ Value ImageSource::serialize() const {
 optional<conversion::Error> ImageSource::setPropertyInternal(const std::string& name,
                                                              const conversion::Convertible& value) {
     using namespace conversion;
-    optional<Error> error;
+    optional<Error> error = Source::setPropertyInternal(name, value);
+    assert(error);
     if (name == "url") {
         if (auto url_ = convert<std::string>(value, *error)) {
             setURL(*url_);
@@ -133,7 +134,7 @@ optional<conversion::Error> ImageSource::setPropertyInternal(const std::string& 
             return nullopt;
         }
     }
-    return error ? error : Source::setPropertyInternal(name, value);
+    return error;
 }
 
 Value ImageSource::getPropertyInternal(const std::string& name) const {

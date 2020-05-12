@@ -1,4 +1,5 @@
 #include <mbgl/storage/file_source.hpp>
+#include <mbgl/style/conversion/constant.hpp>
 #include <mbgl/style/conversion/geojson.hpp>
 #include <mbgl/style/conversion/json.hpp>
 #include <mbgl/style/layer.hpp>
@@ -140,6 +141,27 @@ bool GeoJSONSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) co
 
 Mutable<Source::Impl> GeoJSONSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
+}
+
+optional<conversion::Error> GeoJSONSource::setPropertyInternal(const std::string& name,
+                                                               const conversion::Convertible& value) {
+    using namespace conversion;
+    optional<Error> error = Source::setPropertyInternal(name, value);
+    assert(error);
+    if (name == "data") {
+        if (isObject(value)) {
+            if (auto geoJSON = convert<GeoJSON>(value, *error)) {
+                setGeoJSON(*geoJSON);
+                return nullopt;
+            }
+        } else if (auto url_ = convert<std::string>(value, *error)) {
+            setURL(*url_);
+            return nullopt;
+        } else {
+            error = Error{"GeoJSON data must be a URL or an object"};
+        }
+    }
+    return error;
 }
 
 Value GeoJSONSource::serialize() const {
