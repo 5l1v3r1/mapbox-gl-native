@@ -64,7 +64,6 @@ public:
     void setURL(const std::string& url);
     void setGeoJSON(const GeoJSON&);
     void setGeoJSONData(std::shared_ptr<GeoJSONData>);
-    void setSourceData(SourceData data) override;
     optional<Resource> getResource() const override;
     const GeoJSONData* getGeoJSONData() const override;
 

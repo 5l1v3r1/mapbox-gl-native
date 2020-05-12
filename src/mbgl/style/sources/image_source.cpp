@@ -54,9 +54,7 @@ void ImageSource::setImage(PremultipliedImage&& image_) {
 }
 
 void ImageSource::setSourceData(SourceData data) {
-    if (data.url) {
-        setURL(*data.url);
-    } else if (data.image) {
+    if (data.image) {
         setImage(std::move(*data.image));
     }
 }

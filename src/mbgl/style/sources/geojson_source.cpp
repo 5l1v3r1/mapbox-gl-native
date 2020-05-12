@@ -62,16 +62,6 @@ void GeoJSONSource::setGeoJSONData(std::shared_ptr<GeoJSONData> geoJSONData) {
     observer->onSourceChanged(*this);
 }
 
-void GeoJSONSource::setSourceData(SourceData data) {
-    if (data.url) {
-        setURL(*data.url);
-    } else if (data.geoJSON) {
-        setGeoJSON(*data.geoJSON);
-    } else if (data.geoJSONData) {
-        setGeoJSONData(std::move(data.geoJSONData));
-    }
-}
-
 optional<Resource> GeoJSONSource::getResource() const {
     if (!url) return nullopt;
     return Resource::source(*url);
