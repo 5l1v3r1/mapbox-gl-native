@@ -35,6 +35,7 @@ public:
     }
 
     static PremultipliedImage GetImage(jni::JNIEnv&, const jni::Object<Bitmap>&);
+    static AlphaImage GetAlphaImage(jni::JNIEnv&, const jni::Object<Bitmap>&);
     static jni::Local<jni::Object<Bitmap>> CreateBitmap(jni::JNIEnv&, const PremultipliedImage&);
     static jni::Local<jni::Object<Bitmap>> Copy(jni::JNIEnv&, const jni::Object<Bitmap>&);
 };

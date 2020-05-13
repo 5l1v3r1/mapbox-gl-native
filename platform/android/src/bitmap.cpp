@@ -120,5 +120,21 @@ jni::Local<jni::Object<Bitmap>> Bitmap::Copy(jni::JNIEnv& env, const jni::Object
     return bitmap.Call(env, copy, Bitmap::Config::Create(env, Bitmap::Config::Value::ARGB_8888), jni::jni_false);
 }
 
+AlphaImage Bitmap::GetAlphaImage(jni::JNIEnv& env, const jni::Object<Bitmap>& bitmap) {
+    AndroidBitmapInfo info;
+    const int result = AndroidBitmap_getInfo(&env, jni::Unwrap(*bitmap), &info);
+    if (result != ANDROID_BITMAP_RESULT_SUCCESS) {
+        throw std::runtime_error("bitmap decoding: couldn't get bitmap info");
+    }
+
+    if (info.format != ANDROID_BITMAP_FORMAT_A_8) {
+        Log::Error(Event::JNI, "bitmap decoding: GetAlphaImage must be invoked for single channel bitmaps");
+        return AlphaImage(Size{info.width, info.height});
+    }
+
+    PixelGuard guard(env, bitmap);
+    return AlphaImage(Size{info.width, info.height}, guard.get(), info.stride * info.height);
+}
+
 } // namespace android
 } // namespace mbgl
