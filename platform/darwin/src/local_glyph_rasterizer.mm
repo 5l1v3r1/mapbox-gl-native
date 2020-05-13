@@ -193,7 +193,7 @@ bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) 
     representing the codepoint.
  @returns An image containing the glyph.
  */
-PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics& metrics) {
+AlphaImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics& metrics) {
     CFStringRefHandle string(CFStringCreateWithCharacters(NULL, reinterpret_cast<UniChar*>(&glyphID), 1));
     if (!string) {
         throw std::runtime_error("Unable to create string from codepoint");
@@ -224,25 +224,25 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     metrics.width = size.width;
     metrics.height = size.height;
     
-    PremultipliedImage rgbaBitmap(size);
+    AlphaImage bitmap(size);
     
-    CGColorSpaceHandle colorSpace(CGColorSpaceCreateDeviceRGB());
+    CGColorSpaceHandle colorSpace(CGColorSpaceCreateDeviceGray());
     if (!colorSpace) {
-        throw std::runtime_error("CGColorSpaceCreateDeviceRGB failed");
+        throw std::runtime_error("CGColorSpaceCreateDeviceGray failed");
     }
     
     constexpr const size_t bitsPerComponent = 8;
-    constexpr const size_t bytesPerPixel = 4;
+    constexpr const size_t bytesPerPixel = 1;
     const size_t bytesPerRow = bytesPerPixel * size.width;
 
     CGContextHandle context(CGBitmapContextCreate(
-        rgbaBitmap.data.get(),
+        bitmap.data.get(),
         size.width,
         size.height,
         bitsPerComponent,
         bytesPerRow,
         *colorSpace,
-        kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast));
+        kCGBitmapByteOrderDefault | kCGImageAlphaOnly));
     if (!context) {
         throw std::runtime_error("CGBitmapContextCreate failed");
     }
@@ -265,7 +265,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     
     CTLineDraw(*line, *context);
     
-    return rgbaBitmap;
+    return bitmap;
 }
 
 /**
@@ -287,15 +287,7 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID g
     }
     
     manufacturedGlyph.id = glyphID;
-
-    PremultipliedImage rgbaBitmap = drawGlyphBitmap(glyphID, *font, manufacturedGlyph.metrics);
-    
-    Size size(manufacturedGlyph.metrics.width, manufacturedGlyph.metrics.height);
-    // Copy alpha values from RGBA bitmap into the AlphaImage output
-    manufacturedGlyph.bitmap = AlphaImage(size);
-    for (uint32_t i = 0; i < size.width * size.height; i++) {
-        manufacturedGlyph.bitmap.data[i] = rgbaBitmap.data[4 * i + 3];
-    }
+    manufacturedGlyph.bitmap = drawGlyphBitmap(glyphID, *font, manufacturedGlyph.metrics);
 
     return manufacturedGlyph;
 }
