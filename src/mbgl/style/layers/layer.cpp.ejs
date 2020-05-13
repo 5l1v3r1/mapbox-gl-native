@@ -339,6 +339,29 @@ StyleProperty <%- camelize(type) %>Layer::getPropertyInternal(const std::string&
     return getLayerProperty(*this, name);
 }
 
+StyleProperty <%- camelize(type) %>Layer::getPropertyDefaultValueInternal(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it == layerProperties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+<% for (const property of paintProperties) { -%>
+        case Property::<%- camelize(property.name) %>:
+            return makeStyleProperty(<%- camelize(type) %>Layer::getDefault<%- camelize(property.name) %>());
+<% } -%>
+<% for (const property of layoutProperties) { -%>
+        case Property::<%- camelize(property.name) %>:
+            return makeStyleProperty(<%- camelize(type) %>Layer::getDefault<%- camelize(property.name) %>());
+<% } -%>
+<% for (const property of paintProperties) { -%>
+        case Property::<%- camelize(property.name) %>Transition:
+            break;
+<% } -%>
+    }
+    return {};
+}
+
 Mutable<Layer::Impl> <%- camelize(type) %>Layer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }

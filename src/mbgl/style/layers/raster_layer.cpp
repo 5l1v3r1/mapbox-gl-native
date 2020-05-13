@@ -503,6 +503,49 @@ StyleProperty RasterLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 
+StyleProperty RasterLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it == layerProperties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+        case Property::RasterBrightnessMax:
+            return makeStyleProperty(RasterLayer::getDefaultRasterBrightnessMax());
+        case Property::RasterBrightnessMin:
+            return makeStyleProperty(RasterLayer::getDefaultRasterBrightnessMin());
+        case Property::RasterContrast:
+            return makeStyleProperty(RasterLayer::getDefaultRasterContrast());
+        case Property::RasterFadeDuration:
+            return makeStyleProperty(RasterLayer::getDefaultRasterFadeDuration());
+        case Property::RasterHueRotate:
+            return makeStyleProperty(RasterLayer::getDefaultRasterHueRotate());
+        case Property::RasterOpacity:
+            return makeStyleProperty(RasterLayer::getDefaultRasterOpacity());
+        case Property::RasterResampling:
+            return makeStyleProperty(RasterLayer::getDefaultRasterResampling());
+        case Property::RasterSaturation:
+            return makeStyleProperty(RasterLayer::getDefaultRasterSaturation());
+        case Property::RasterBrightnessMaxTransition:
+            break;
+        case Property::RasterBrightnessMinTransition:
+            break;
+        case Property::RasterContrastTransition:
+            break;
+        case Property::RasterFadeDurationTransition:
+            break;
+        case Property::RasterHueRotateTransition:
+            break;
+        case Property::RasterOpacityTransition:
+            break;
+        case Property::RasterResamplingTransition:
+            break;
+        case Property::RasterSaturationTransition:
+            break;
+    }
+    return {};
+}
+
 Mutable<Layer::Impl> RasterLayer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }

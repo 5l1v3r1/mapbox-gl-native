@@ -684,6 +684,63 @@ StyleProperty LocationIndicatorLayer::getPropertyInternal(const std::string& nam
     return getLayerProperty(*this, name);
 }
 
+StyleProperty LocationIndicatorLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it == layerProperties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+        case Property::AccuracyRadius:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultAccuracyRadius());
+        case Property::AccuracyRadiusBorderColor:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultAccuracyRadiusBorderColor());
+        case Property::AccuracyRadiusColor:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultAccuracyRadiusColor());
+        case Property::Bearing:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultBearing());
+        case Property::BearingImageSize:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultBearingImageSize());
+        case Property::ImageTiltDisplacement:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultImageTiltDisplacement());
+        case Property::Location:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultLocation());
+        case Property::PerspectiveCompensation:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultPerspectiveCompensation());
+        case Property::ShadowImageSize:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultShadowImageSize());
+        case Property::TopImageSize:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultTopImageSize());
+        case Property::BearingImage:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultBearingImage());
+        case Property::ShadowImage:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultShadowImage());
+        case Property::TopImage:
+            return makeStyleProperty(LocationIndicatorLayer::getDefaultTopImage());
+        case Property::AccuracyRadiusTransition:
+            break;
+        case Property::AccuracyRadiusBorderColorTransition:
+            break;
+        case Property::AccuracyRadiusColorTransition:
+            break;
+        case Property::BearingTransition:
+            break;
+        case Property::BearingImageSizeTransition:
+            break;
+        case Property::ImageTiltDisplacementTransition:
+            break;
+        case Property::LocationTransition:
+            break;
+        case Property::PerspectiveCompensationTransition:
+            break;
+        case Property::ShadowImageSizeTransition:
+            break;
+        case Property::TopImageSizeTransition:
+            break;
+    }
+    return {};
+}
+
 Mutable<Layer::Impl> LocationIndicatorLayer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }

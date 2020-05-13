@@ -684,6 +684,63 @@ StyleProperty CircleLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 
+StyleProperty CircleLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it == layerProperties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+        case Property::CircleBlur:
+            return makeStyleProperty(CircleLayer::getDefaultCircleBlur());
+        case Property::CircleColor:
+            return makeStyleProperty(CircleLayer::getDefaultCircleColor());
+        case Property::CircleOpacity:
+            return makeStyleProperty(CircleLayer::getDefaultCircleOpacity());
+        case Property::CirclePitchAlignment:
+            return makeStyleProperty(CircleLayer::getDefaultCirclePitchAlignment());
+        case Property::CirclePitchScale:
+            return makeStyleProperty(CircleLayer::getDefaultCirclePitchScale());
+        case Property::CircleRadius:
+            return makeStyleProperty(CircleLayer::getDefaultCircleRadius());
+        case Property::CircleStrokeColor:
+            return makeStyleProperty(CircleLayer::getDefaultCircleStrokeColor());
+        case Property::CircleStrokeOpacity:
+            return makeStyleProperty(CircleLayer::getDefaultCircleStrokeOpacity());
+        case Property::CircleStrokeWidth:
+            return makeStyleProperty(CircleLayer::getDefaultCircleStrokeWidth());
+        case Property::CircleTranslate:
+            return makeStyleProperty(CircleLayer::getDefaultCircleTranslate());
+        case Property::CircleTranslateAnchor:
+            return makeStyleProperty(CircleLayer::getDefaultCircleTranslateAnchor());
+        case Property::CircleSortKey:
+            return makeStyleProperty(CircleLayer::getDefaultCircleSortKey());
+        case Property::CircleBlurTransition:
+            break;
+        case Property::CircleColorTransition:
+            break;
+        case Property::CircleOpacityTransition:
+            break;
+        case Property::CirclePitchAlignmentTransition:
+            break;
+        case Property::CirclePitchScaleTransition:
+            break;
+        case Property::CircleRadiusTransition:
+            break;
+        case Property::CircleStrokeColorTransition:
+            break;
+        case Property::CircleStrokeOpacityTransition:
+            break;
+        case Property::CircleStrokeWidthTransition:
+            break;
+        case Property::CircleTranslateTransition:
+            break;
+        case Property::CircleTranslateAnchorTransition:
+            break;
+    }
+    return {};
+}
+
 Mutable<Layer::Impl> CircleLayer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }

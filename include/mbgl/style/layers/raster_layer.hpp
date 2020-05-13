@@ -82,6 +82,7 @@ protected:
     // Dynamic properties
     optional<conversion::Error> setPropertyInternal(const std::string& name, const conversion::Convertible& value) final;
     StyleProperty getPropertyInternal(const std::string& name) const final;
+    StyleProperty getPropertyDefaultValueInternal(const std::string&) const final;
     Value serialize() const final;
 
     Mutable<Layer::Impl> mutableBaseImpl() const final;

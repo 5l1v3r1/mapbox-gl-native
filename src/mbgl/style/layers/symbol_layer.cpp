@@ -1875,6 +1875,155 @@ StyleProperty SymbolLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 
+StyleProperty SymbolLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it == layerProperties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+        case Property::IconColor:
+            return makeStyleProperty(SymbolLayer::getDefaultIconColor());
+        case Property::IconHaloBlur:
+            return makeStyleProperty(SymbolLayer::getDefaultIconHaloBlur());
+        case Property::IconHaloColor:
+            return makeStyleProperty(SymbolLayer::getDefaultIconHaloColor());
+        case Property::IconHaloWidth:
+            return makeStyleProperty(SymbolLayer::getDefaultIconHaloWidth());
+        case Property::IconOpacity:
+            return makeStyleProperty(SymbolLayer::getDefaultIconOpacity());
+        case Property::IconTranslate:
+            return makeStyleProperty(SymbolLayer::getDefaultIconTranslate());
+        case Property::IconTranslateAnchor:
+            return makeStyleProperty(SymbolLayer::getDefaultIconTranslateAnchor());
+        case Property::TextColor:
+            return makeStyleProperty(SymbolLayer::getDefaultTextColor());
+        case Property::TextHaloBlur:
+            return makeStyleProperty(SymbolLayer::getDefaultTextHaloBlur());
+        case Property::TextHaloColor:
+            return makeStyleProperty(SymbolLayer::getDefaultTextHaloColor());
+        case Property::TextHaloWidth:
+            return makeStyleProperty(SymbolLayer::getDefaultTextHaloWidth());
+        case Property::TextOpacity:
+            return makeStyleProperty(SymbolLayer::getDefaultTextOpacity());
+        case Property::TextTranslate:
+            return makeStyleProperty(SymbolLayer::getDefaultTextTranslate());
+        case Property::TextTranslateAnchor:
+            return makeStyleProperty(SymbolLayer::getDefaultTextTranslateAnchor());
+        case Property::IconAllowOverlap:
+            return makeStyleProperty(SymbolLayer::getDefaultIconAllowOverlap());
+        case Property::IconAnchor:
+            return makeStyleProperty(SymbolLayer::getDefaultIconAnchor());
+        case Property::IconIgnorePlacement:
+            return makeStyleProperty(SymbolLayer::getDefaultIconIgnorePlacement());
+        case Property::IconImage:
+            return makeStyleProperty(SymbolLayer::getDefaultIconImage());
+        case Property::IconKeepUpright:
+            return makeStyleProperty(SymbolLayer::getDefaultIconKeepUpright());
+        case Property::IconOffset:
+            return makeStyleProperty(SymbolLayer::getDefaultIconOffset());
+        case Property::IconOptional:
+            return makeStyleProperty(SymbolLayer::getDefaultIconOptional());
+        case Property::IconPadding:
+            return makeStyleProperty(SymbolLayer::getDefaultIconPadding());
+        case Property::IconPitchAlignment:
+            return makeStyleProperty(SymbolLayer::getDefaultIconPitchAlignment());
+        case Property::IconRotate:
+            return makeStyleProperty(SymbolLayer::getDefaultIconRotate());
+        case Property::IconRotationAlignment:
+            return makeStyleProperty(SymbolLayer::getDefaultIconRotationAlignment());
+        case Property::IconSize:
+            return makeStyleProperty(SymbolLayer::getDefaultIconSize());
+        case Property::IconTextFit:
+            return makeStyleProperty(SymbolLayer::getDefaultIconTextFit());
+        case Property::IconTextFitPadding:
+            return makeStyleProperty(SymbolLayer::getDefaultIconTextFitPadding());
+        case Property::SymbolAvoidEdges:
+            return makeStyleProperty(SymbolLayer::getDefaultSymbolAvoidEdges());
+        case Property::SymbolPlacement:
+            return makeStyleProperty(SymbolLayer::getDefaultSymbolPlacement());
+        case Property::SymbolSortKey:
+            return makeStyleProperty(SymbolLayer::getDefaultSymbolSortKey());
+        case Property::SymbolSpacing:
+            return makeStyleProperty(SymbolLayer::getDefaultSymbolSpacing());
+        case Property::SymbolZOrder:
+            return makeStyleProperty(SymbolLayer::getDefaultSymbolZOrder());
+        case Property::TextAllowOverlap:
+            return makeStyleProperty(SymbolLayer::getDefaultTextAllowOverlap());
+        case Property::TextAnchor:
+            return makeStyleProperty(SymbolLayer::getDefaultTextAnchor());
+        case Property::TextField:
+            return makeStyleProperty(SymbolLayer::getDefaultTextField());
+        case Property::TextFont:
+            return makeStyleProperty(SymbolLayer::getDefaultTextFont());
+        case Property::TextIgnorePlacement:
+            return makeStyleProperty(SymbolLayer::getDefaultTextIgnorePlacement());
+        case Property::TextJustify:
+            return makeStyleProperty(SymbolLayer::getDefaultTextJustify());
+        case Property::TextKeepUpright:
+            return makeStyleProperty(SymbolLayer::getDefaultTextKeepUpright());
+        case Property::TextLetterSpacing:
+            return makeStyleProperty(SymbolLayer::getDefaultTextLetterSpacing());
+        case Property::TextLineHeight:
+            return makeStyleProperty(SymbolLayer::getDefaultTextLineHeight());
+        case Property::TextMaxAngle:
+            return makeStyleProperty(SymbolLayer::getDefaultTextMaxAngle());
+        case Property::TextMaxWidth:
+            return makeStyleProperty(SymbolLayer::getDefaultTextMaxWidth());
+        case Property::TextOffset:
+            return makeStyleProperty(SymbolLayer::getDefaultTextOffset());
+        case Property::TextOptional:
+            return makeStyleProperty(SymbolLayer::getDefaultTextOptional());
+        case Property::TextPadding:
+            return makeStyleProperty(SymbolLayer::getDefaultTextPadding());
+        case Property::TextPitchAlignment:
+            return makeStyleProperty(SymbolLayer::getDefaultTextPitchAlignment());
+        case Property::TextRadialOffset:
+            return makeStyleProperty(SymbolLayer::getDefaultTextRadialOffset());
+        case Property::TextRotate:
+            return makeStyleProperty(SymbolLayer::getDefaultTextRotate());
+        case Property::TextRotationAlignment:
+            return makeStyleProperty(SymbolLayer::getDefaultTextRotationAlignment());
+        case Property::TextSize:
+            return makeStyleProperty(SymbolLayer::getDefaultTextSize());
+        case Property::TextTransform:
+            return makeStyleProperty(SymbolLayer::getDefaultTextTransform());
+        case Property::TextVariableAnchor:
+            return makeStyleProperty(SymbolLayer::getDefaultTextVariableAnchor());
+        case Property::TextWritingMode:
+            return makeStyleProperty(SymbolLayer::getDefaultTextWritingMode());
+        case Property::IconColorTransition:
+            break;
+        case Property::IconHaloBlurTransition:
+            break;
+        case Property::IconHaloColorTransition:
+            break;
+        case Property::IconHaloWidthTransition:
+            break;
+        case Property::IconOpacityTransition:
+            break;
+        case Property::IconTranslateTransition:
+            break;
+        case Property::IconTranslateAnchorTransition:
+            break;
+        case Property::TextColorTransition:
+            break;
+        case Property::TextHaloBlurTransition:
+            break;
+        case Property::TextHaloColorTransition:
+            break;
+        case Property::TextHaloWidthTransition:
+            break;
+        case Property::TextOpacityTransition:
+            break;
+        case Property::TextTranslateTransition:
+            break;
+        case Property::TextTranslateAnchorTransition:
+            break;
+    }
+    return {};
+}
+
 Mutable<Layer::Impl> SymbolLayer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }

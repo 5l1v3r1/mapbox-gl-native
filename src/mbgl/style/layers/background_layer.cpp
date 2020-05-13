@@ -278,6 +278,29 @@ StyleProperty BackgroundLayer::getPropertyInternal(const std::string& name) cons
     return getLayerProperty(*this, name);
 }
 
+StyleProperty BackgroundLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it == layerProperties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+        case Property::BackgroundColor:
+            return makeStyleProperty(BackgroundLayer::getDefaultBackgroundColor());
+        case Property::BackgroundOpacity:
+            return makeStyleProperty(BackgroundLayer::getDefaultBackgroundOpacity());
+        case Property::BackgroundPattern:
+            return makeStyleProperty(BackgroundLayer::getDefaultBackgroundPattern());
+        case Property::BackgroundColorTransition:
+            break;
+        case Property::BackgroundOpacityTransition:
+            break;
+        case Property::BackgroundPatternTransition:
+            break;
+    }
+    return {};
+}
+
 Mutable<Layer::Impl> BackgroundLayer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }

@@ -418,6 +418,41 @@ StyleProperty HillshadeLayer::getPropertyInternal(const std::string& name) const
     return getLayerProperty(*this, name);
 }
 
+StyleProperty HillshadeLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it == layerProperties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+        case Property::HillshadeAccentColor:
+            return makeStyleProperty(HillshadeLayer::getDefaultHillshadeAccentColor());
+        case Property::HillshadeExaggeration:
+            return makeStyleProperty(HillshadeLayer::getDefaultHillshadeExaggeration());
+        case Property::HillshadeHighlightColor:
+            return makeStyleProperty(HillshadeLayer::getDefaultHillshadeHighlightColor());
+        case Property::HillshadeIlluminationAnchor:
+            return makeStyleProperty(HillshadeLayer::getDefaultHillshadeIlluminationAnchor());
+        case Property::HillshadeIlluminationDirection:
+            return makeStyleProperty(HillshadeLayer::getDefaultHillshadeIlluminationDirection());
+        case Property::HillshadeShadowColor:
+            return makeStyleProperty(HillshadeLayer::getDefaultHillshadeShadowColor());
+        case Property::HillshadeAccentColorTransition:
+            break;
+        case Property::HillshadeExaggerationTransition:
+            break;
+        case Property::HillshadeHighlightColorTransition:
+            break;
+        case Property::HillshadeIlluminationAnchorTransition:
+            break;
+        case Property::HillshadeIlluminationDirectionTransition:
+            break;
+        case Property::HillshadeShadowColorTransition:
+            break;
+    }
+    return {};
+}
+
 Mutable<Layer::Impl> HillshadeLayer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }

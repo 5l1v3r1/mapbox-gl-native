@@ -800,6 +800,71 @@ StyleProperty LineLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 
+StyleProperty LineLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it == layerProperties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+        case Property::LineBlur:
+            return makeStyleProperty(LineLayer::getDefaultLineBlur());
+        case Property::LineColor:
+            return makeStyleProperty(LineLayer::getDefaultLineColor());
+        case Property::LineDasharray:
+            return makeStyleProperty(LineLayer::getDefaultLineDasharray());
+        case Property::LineGapWidth:
+            return makeStyleProperty(LineLayer::getDefaultLineGapWidth());
+        case Property::LineGradient:
+            return makeStyleProperty(LineLayer::getDefaultLineGradient());
+        case Property::LineOffset:
+            return makeStyleProperty(LineLayer::getDefaultLineOffset());
+        case Property::LineOpacity:
+            return makeStyleProperty(LineLayer::getDefaultLineOpacity());
+        case Property::LinePattern:
+            return makeStyleProperty(LineLayer::getDefaultLinePattern());
+        case Property::LineTranslate:
+            return makeStyleProperty(LineLayer::getDefaultLineTranslate());
+        case Property::LineTranslateAnchor:
+            return makeStyleProperty(LineLayer::getDefaultLineTranslateAnchor());
+        case Property::LineWidth:
+            return makeStyleProperty(LineLayer::getDefaultLineWidth());
+        case Property::LineCap:
+            return makeStyleProperty(LineLayer::getDefaultLineCap());
+        case Property::LineJoin:
+            return makeStyleProperty(LineLayer::getDefaultLineJoin());
+        case Property::LineMiterLimit:
+            return makeStyleProperty(LineLayer::getDefaultLineMiterLimit());
+        case Property::LineRoundLimit:
+            return makeStyleProperty(LineLayer::getDefaultLineRoundLimit());
+        case Property::LineSortKey:
+            return makeStyleProperty(LineLayer::getDefaultLineSortKey());
+        case Property::LineBlurTransition:
+            break;
+        case Property::LineColorTransition:
+            break;
+        case Property::LineDasharrayTransition:
+            break;
+        case Property::LineGapWidthTransition:
+            break;
+        case Property::LineGradientTransition:
+            break;
+        case Property::LineOffsetTransition:
+            break;
+        case Property::LineOpacityTransition:
+            break;
+        case Property::LinePatternTransition:
+            break;
+        case Property::LineTranslateTransition:
+            break;
+        case Property::LineTranslateAnchorTransition:
+            break;
+        case Property::LineWidthTransition:
+            break;
+    }
+    return {};
+}
+
 Mutable<Layer::Impl> LineLayer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }

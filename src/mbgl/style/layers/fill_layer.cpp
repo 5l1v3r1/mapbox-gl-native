@@ -502,6 +502,47 @@ StyleProperty FillLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 
+StyleProperty FillLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it == layerProperties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+        case Property::FillAntialias:
+            return makeStyleProperty(FillLayer::getDefaultFillAntialias());
+        case Property::FillColor:
+            return makeStyleProperty(FillLayer::getDefaultFillColor());
+        case Property::FillOpacity:
+            return makeStyleProperty(FillLayer::getDefaultFillOpacity());
+        case Property::FillOutlineColor:
+            return makeStyleProperty(FillLayer::getDefaultFillOutlineColor());
+        case Property::FillPattern:
+            return makeStyleProperty(FillLayer::getDefaultFillPattern());
+        case Property::FillTranslate:
+            return makeStyleProperty(FillLayer::getDefaultFillTranslate());
+        case Property::FillTranslateAnchor:
+            return makeStyleProperty(FillLayer::getDefaultFillTranslateAnchor());
+        case Property::FillSortKey:
+            return makeStyleProperty(FillLayer::getDefaultFillSortKey());
+        case Property::FillAntialiasTransition:
+            break;
+        case Property::FillColorTransition:
+            break;
+        case Property::FillOpacityTransition:
+            break;
+        case Property::FillOutlineColorTransition:
+            break;
+        case Property::FillPatternTransition:
+            break;
+        case Property::FillTranslateTransition:
+            break;
+        case Property::FillTranslateAnchorTransition:
+            break;
+    }
+    return {};
+}
+
 Mutable<Layer::Impl> FillLayer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }

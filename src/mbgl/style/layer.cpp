@@ -53,10 +53,10 @@ StyleProperty getLayerPropertyDefaultValue(Property property) {
         case Property::SourceLayer:
             return makeConstantStyleProperty(std::string());
         case Property::Type:
-            return kUndefinedProperty;
+            return {};
     }
     assert(false);
-    return kUndefinedProperty;
+    return {};
 }
 
 StyleProperty getLayerProperty(const Layer* layer, Property property) {
@@ -289,7 +289,7 @@ const LayerTypeInfo* Layer::getTypeInfo() const noexcept {
 }
 
 StyleProperty Layer::getPropertyDefaultValueInternal(const std::string&) const {
-    return kUndefinedProperty;
+    return {};
 }
 
 } // namespace style

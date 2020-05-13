@@ -374,6 +374,37 @@ StyleProperty HeatmapLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 
+StyleProperty HeatmapLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it == layerProperties.end()) {
+        return {};
+    }
+
+    switch (static_cast<Property>(it->second)) {
+        case Property::HeatmapColor:
+            return makeStyleProperty(HeatmapLayer::getDefaultHeatmapColor());
+        case Property::HeatmapIntensity:
+            return makeStyleProperty(HeatmapLayer::getDefaultHeatmapIntensity());
+        case Property::HeatmapOpacity:
+            return makeStyleProperty(HeatmapLayer::getDefaultHeatmapOpacity());
+        case Property::HeatmapRadius:
+            return makeStyleProperty(HeatmapLayer::getDefaultHeatmapRadius());
+        case Property::HeatmapWeight:
+            return makeStyleProperty(HeatmapLayer::getDefaultHeatmapWeight());
+        case Property::HeatmapColorTransition:
+            break;
+        case Property::HeatmapIntensityTransition:
+            break;
+        case Property::HeatmapOpacityTransition:
+            break;
+        case Property::HeatmapRadiusTransition:
+            break;
+        case Property::HeatmapWeightTransition:
+            break;
+    }
+    return {};
+}
+
 Mutable<Layer::Impl> HeatmapLayer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }
