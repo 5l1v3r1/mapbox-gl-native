@@ -17,6 +17,9 @@ public:
     Value& getValue() { return value; }
     Kind getKind() const { return kind; }
 
+    bool operator==(const StyleProperty& o) const { return kind == o.kind && value == o.value; }
+    bool operator!=(const StyleProperty& o) const { return !(*this == o); }
+
 private:
     Value value;
     Kind kind = Kind::Undefined;

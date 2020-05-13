@@ -114,6 +114,7 @@ public:
     // Dynamic properties
     optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
     StyleProperty getProperty(const std::string& name) const;
+    StyleProperty getPropertyDefaultValue(const std::string& name) const;
     Value serialize() const override;
 
     // Private implementation
@@ -145,6 +146,7 @@ protected:
     virtual optional<conversion::Error> setPropertyInternal(const std::string& name,
                                                             const conversion::Convertible& value) = 0;
     virtual StyleProperty getPropertyInternal(const std::string&) const = 0;
+    virtual StyleProperty getPropertyDefaultValueInternal(const std::string&) const;
     LayerObserver* observer;
     mapbox::base::WeakPtrFactory<Layer> weakFactory {this};
 

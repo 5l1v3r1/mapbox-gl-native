@@ -9,6 +9,8 @@
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/util/logging.hpp>
 
+#include <mapbox/eternal.hpp>
+
 namespace mbgl {
 namespace style {
 
@@ -20,6 +22,66 @@ static_assert(mbgl::underlying_type(TileKind::RasterDEM) == mbgl::underlying_typ
               "tile kind error");
 
 static LayerObserver nullObserver;
+
+namespace {
+
+enum class Property : uint8_t { Visibility = 0u, Minzoom, Maxzoom, Filter, SourceLayer, Source, Type };
+
+constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
+    {{"visibility", underlying_type(Property::Visibility)},
+     {"minzoom", underlying_type(Property::Minzoom)},
+     {"maxzoom", underlying_type(Property::Maxzoom)},
+     {"filter", underlying_type(Property::Filter)},
+     {"source-layer", underlying_type(Property::SourceLayer)},
+     {"source", underlying_type(Property::Source)},
+     {"type", underlying_type(Property::Type)}});
+
+const StyleProperty kUndefinedProperty{Value(), StyleProperty::Kind::Undefined};
+
+StyleProperty getLayerPropertyDefaultValue(Property property) {
+    using namespace conversion;
+    switch (property) {
+        case Property::Visibility:
+            return makeConstantStyleProperty(makeValue(VisibilityType::Visible));
+        case Property::Minzoom:
+            return makeConstantStyleProperty(-std::numeric_limits<float>::infinity());
+        case Property::Maxzoom:
+            return makeConstantStyleProperty(std::numeric_limits<float>::infinity());
+        case Property::Filter:
+            return makeExpressionStyleProperty(makeValue(Filter()));
+        case Property::Source:
+        case Property::SourceLayer:
+            return makeConstantStyleProperty(std::string());
+        case Property::Type:
+            return kUndefinedProperty;
+    }
+    assert(false);
+    return kUndefinedProperty;
+}
+
+StyleProperty getLayerProperty(const Layer* layer, Property property) {
+    using namespace conversion;
+    switch (property) {
+        case Property::Visibility:
+            return makeConstantStyleProperty(layer->getVisibility());
+        case Property::Minzoom:
+            return makeConstantStyleProperty(layer->getMinZoom());
+        case Property::Maxzoom:
+            return makeConstantStyleProperty(layer->getMaxZoom());
+        case Property::Filter:
+            return makeExpressionStyleProperty(layer->getFilter());
+        case Property::Source:
+            return makeConstantStyleProperty(layer->getSourceID());
+        case Property::SourceLayer:
+            return makeConstantStyleProperty(layer->getSourceLayer());
+        case Property::Type:
+            return makeConstantStyleProperty(layer->getTypeInfo()->type);
+    }
+    assert(false);
+    return kUndefinedProperty;
+}
+
+} // namespace
 
 Layer::Layer(Immutable<Impl> impl)
     : baseImpl(std::move(impl)),
@@ -106,34 +168,19 @@ void Layer::setMaxZoom(float maxZoom) {
 Value Layer::serialize() const {
     mapbox::base::ValueObject result;
     result.emplace(std::make_pair("id", getID()));
-    result.emplace(std::make_pair("type", Layer::getTypeInfo()->type));
-
-    auto source = getSourceID();
-    if (!source.empty()) {
-        result.emplace(std::make_pair("source", std::move(source)));
+    for (const auto& pair : layerProperties) {
+        Property property = static_cast<Property>(pair.second);
+        std::string key = pair.first.c_str();
+        auto styleProperty = getLayerProperty(this, property);
+        if (styleProperty != getLayerPropertyDefaultValue(property)) {
+            auto keyValue = std::make_pair(std::move(key), std::move(styleProperty.getValue()));
+            if (property == Property::Visibility) { // :-(
+                result["layout"] = mapbox::base::ValueObject{std::move(keyValue)};
+            } else {
+                result.emplace(std::move(keyValue));
+            }
+        }
     }
-
-    auto sourceLayer = getSourceLayer();
-    if (!sourceLayer.empty()) {
-        result.emplace(std::make_pair("source-layer", std::move(sourceLayer)));
-    }
-
-    if (getFilter()) {
-        result.emplace(std::make_pair("filter", getFilter().serialize()));
-    }
-
-    if (getMinZoom() != -std::numeric_limits<float>::infinity()) {
-        result.emplace(std::make_pair("minzoom", getMinZoom()));
-    }
-
-    if (getMaxZoom() != std::numeric_limits<float>::infinity()) {
-        result.emplace(std::make_pair("maxzoom", getMaxZoom()));
-    }
-
-    if (getVisibility() == VisibilityType::None) {
-        result["layout"] = mapbox::base::ValueObject{std::make_pair("visibility", "none")};
-    }
-
     return result;
 }
 
@@ -204,29 +251,19 @@ optional<conversion::Error> Layer::setProperty(const std::string& name, const co
 }
 
 StyleProperty Layer::getProperty(const std::string& name) const {
-    using namespace conversion;
-    if (name == "visibility") {
-        return makeConstantStyleProperty(getVisibility());
-    }
-    if (name == "minzoom") {
-        return makeConstantStyleProperty(getMinZoom());
-    }
-    if (name == "maxzoom") {
-        return makeConstantStyleProperty(getMaxZoom());
-    }
-    if (name == "filter") {
-        return makeExpressionStyleProperty(getFilter());
-    }
-    if (name == "source-layer") {
-        return makeConstantStyleProperty(getSourceLayer());
-    }
-    if (name == "source") {
-        return makeConstantStyleProperty(getSourceID());
-    }
-    if (name == "type") {
-        return makeConstantStyleProperty(getTypeInfo()->type);
+    const auto it = layerProperties.find(name.c_str());
+    if (it != layerProperties.end()) {
+        return getLayerProperty(this, static_cast<Property>(it->second));
     }
     return getPropertyInternal(name);
+}
+
+StyleProperty Layer::getPropertyDefaultValue(const std::string& name) const {
+    const auto it = layerProperties.find(name.c_str());
+    if (it != layerProperties.end()) {
+        return getLayerPropertyDefaultValue(static_cast<Property>(it->second));
+    }
+    return getPropertyDefaultValueInternal(name);
 }
 
 optional<conversion::Error> Layer::setVisibility(const conversion::Convertible& value) {
@@ -249,6 +286,10 @@ optional<conversion::Error> Layer::setVisibility(const conversion::Convertible& 
 
 const LayerTypeInfo* Layer::getTypeInfo() const noexcept {
     return baseImpl->getTypeInfo();
+}
+
+StyleProperty Layer::getPropertyDefaultValueInternal(const std::string&) const {
+    return kUndefinedProperty;
 }
 
 } // namespace style
