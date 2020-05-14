@@ -16,8 +16,15 @@ std::unique_ptr<Source> parseSource(const std::string& src, const std::string& s
     return nullptr;
 }
 
-void checkConstProperty(std::unique_ptr<Source>& source, const std::string& propertyName, const mbgl::Value& expected) {
+void checkGetProperty(std::unique_ptr<Source>& source, const std::string& propertyName, const mbgl::Value& expected) {
     Value value = source->getProperty(propertyName);
+    EXPECT_EQ(expected, value) << "get property: " << propertyName;
+}
+
+void checkGetPropertyDefaultValue(std::unique_ptr<Source>& source,
+                                  const std::string& propertyName,
+                                  const mbgl::Value& expected) {
+    Value value = source->getPropertyDefaultValue(propertyName);
     EXPECT_EQ(expected, value) << "get property: " << propertyName;
 }
 
@@ -41,21 +48,21 @@ TEST(StyleConversion, SetSourceGenericProperties) {
                               "vector_source");
 
     ASSERT_NE(nullptr, source);
-    checkConstProperty(source, "volatile", false);
+    checkGetProperty(source, "volatile", false);
     checkSetProperty(source, "volatile", JSValue(true));
-    checkConstProperty(source, "volatile", true);
+    checkGetProperty(source, "volatile", true);
 
-    checkConstProperty(source, "minimum-tile-update-interval", 0.0);
+    checkGetProperty(source, "minimum-tile-update-interval", 0.0);
     checkSetProperty(source, "minimum-tile-update-interval", JSValue(10.5));
-    checkConstProperty(source, "minimum-tile-update-interval", 10.5);
+    checkGetProperty(source, "minimum-tile-update-interval", 10.5);
 
-    checkConstProperty(source, "prefetch-zoom-delta", NullValue());
+    checkGetProperty(source, "prefetch-zoom-delta", NullValue());
     checkSetProperty(source, "prefetch-zoom-delta", JSValue(0));
-    checkConstProperty(source, "prefetch-zoom-delta", 0u);
+    checkGetProperty(source, "prefetch-zoom-delta", 0u);
 
-    checkConstProperty(source, "max-overscale-factor-for-parent-tiles", NullValue());
+    checkGetProperty(source, "max-overscale-factor-for-parent-tiles", NullValue());
     checkSetProperty(source, "max-overscale-factor-for-parent-tiles", JSValue(2));
-    checkConstProperty(source, "max-overscale-factor-for-parent-tiles", 2u);
+    checkGetProperty(source, "max-overscale-factor-for-parent-tiles", 2u);
 
     source = parseSource(R"JSON({
         "type": "geojson",
@@ -82,4 +89,25 @@ TEST(StyleConversion, SetSourceGenericProperties) {
     const JSValue* geometry = &document;
     checkSetProperty(source, "data", *geometry);
     EXPECT_TRUE(geojsonSource->getGeoJSONData());
+}
+
+TEST(StyleConversion, GetSourceGenericPropertyDefaultValues) {
+    auto source = parseSource(R"JSON({
+        "type": "vector",
+        "tiles": ["http://example.com/{z}-{x}-{y}.vector.pbf"],
+        "scheme": "tms",
+        "minzoom": 11,
+        "maxzoom": 16,
+        "attribution": "mapbox",
+        "bounds": [-180, -73, -120, 73]
+    })JSON",
+                              "vector_source");
+
+    ASSERT_NE(nullptr, source);
+    checkGetPropertyDefaultValue(source, "volatile", false);
+    checkGetPropertyDefaultValue(source, "minimum-tile-update-interval", 0.0);
+    checkGetPropertyDefaultValue(source, "prefetch-zoom-delta", 4u);
+    checkGetPropertyDefaultValue(source, "minzoom", 0u);
+    checkGetPropertyDefaultValue(source, "maxzoom", 22u);
+    checkGetPropertyDefaultValue(source, "scheme", "xyz");
 }

@@ -6,10 +6,78 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/tileset.hpp>
 
+#include <mapbox/eternal.hpp>
+
 namespace mbgl {
 namespace style {
 
 static SourceObserver nullObserver;
+
+namespace {
+
+enum class Property : uint8_t {
+    Volatile,
+    Attribution,
+    TileSize,
+    PrefetchZoomDelta,
+    MaxOverscaleFactorForParentTiles,
+    MinTileUpdateInterval,
+    Type
+};
+
+constexpr const auto sourceProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
+    {{"volatile", underlying_type(Property::Volatile)},
+     {"attribution", underlying_type(Property::Attribution)},
+     {"tile-size", underlying_type(Property::TileSize)},
+     {"prefetch-zoom-delta", underlying_type(Property::PrefetchZoomDelta)},
+     {"max-overscale-factor-for-parent-tiles", underlying_type(Property::MaxOverscaleFactorForParentTiles)},
+     {"minimum-tile-update-interval", underlying_type(Property::MinTileUpdateInterval)},
+     {"type", underlying_type(Property::Type)}});
+
+Value getSourcePropertyDefaultValue(Property property) {
+    switch (property) {
+        case Property::Volatile:
+            return false;
+        case Property::TileSize:
+            return util::tileSize;
+        case Property::PrefetchZoomDelta:
+            return util::DEFAULT_PREFETCH_ZOOM_DELTA;
+        case Property::Attribution:
+        case Property::MaxOverscaleFactorForParentTiles:
+        case Property::Type:
+            return {};
+        case Property::MinTileUpdateInterval:
+            return 0.0;
+    }
+    assert(false);
+    return NullValue();
+}
+
+Value getSourceProperty(const Source* source, Property property) {
+    using namespace conversion;
+    switch (property) {
+        case Property::Volatile:
+            return source->isVolatile();
+        case Property::Attribution:
+            return makeValue(source->getAttribution());
+        case Property::TileSize:
+            return makeValue(source->getTileSize());
+        case Property::PrefetchZoomDelta:
+            return makeValue(source->getPrefetchZoomDelta());
+        case Property::MaxOverscaleFactorForParentTiles:
+            return makeValue(source->getMaxOverscaleFactorForParentTiles());
+        case Property::MinTileUpdateInterval: {
+            auto seconds =
+                std::chrono::duration_cast<std::chrono::duration<float>>(source->getMinimumTileUpdateInterval());
+            return makeValue(seconds.count());
+        }
+        case Property::Type:
+            return makeValue(source->getTypeInfo()->type);
+    }
+    return NullValue();
+}
+
+} // namespace
 
 Source::Source(Immutable<Impl> impl) : baseImpl(std::move(impl)), observer(&nullObserver) {}
 
@@ -114,20 +182,19 @@ optional<conversion::Error> Source::setProperty(const std::string& name, const c
 }
 
 Value Source::getProperty(const std::string& name) const {
-    using namespace conversion;
-    if (name == "type") return makeValue(getTypeInfo()->type);
-    if (name == "volatile") return makeValue(isVolatile());
-    if (name == "attribution") return makeValue(getAttribution());
-    if (name == "tile-size") return makeValue(getTileSize());
-    if (name == "prefetch-zoom-delta") return makeValue(getPrefetchZoomDelta());
-    if (name == "max-overscale-factor-for-parent-tiles") {
-        return makeValue(getMaxOverscaleFactorForParentTiles());
-    }
-    if (name == "minimum-tile-update-interval") {
-        auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(getMinimumTileUpdateInterval());
-        return makeValue(seconds.count());
+    const auto it = sourceProperties.find(name.c_str());
+    if (it != sourceProperties.end()) {
+        return getSourceProperty(this, static_cast<Property>(it->second));
     }
     return getPropertyInternal(name);
+}
+
+Value Source::getPropertyDefaultValue(const std::string& name) const {
+    const auto it = sourceProperties.find(name.c_str());
+    if (it != sourceProperties.end()) {
+        return getSourcePropertyDefaultValue(static_cast<Property>(it->second));
+    }
+    return getPropertyDefaultValueInternal(name);
 }
 
 const SourceTypeInfo* Source::getTypeInfo() const noexcept {
@@ -150,6 +217,10 @@ optional<conversion::Error> Source::setPropertyInternal(const std::string& name,
 }
 
 Value Source::getPropertyInternal(const std::string&) const {
+    return NullValue();
+}
+
+Value Source::getPropertyDefaultValueInternal(const std::string&) const {
     return NullValue();
 }
 

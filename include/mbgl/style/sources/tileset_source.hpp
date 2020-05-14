@@ -21,6 +21,7 @@ public:
 protected:
     TilesetSource(Immutable<Impl>, variant<std::string, Tileset> urlOrTileset);
     Value getPropertyInternal(const std::string&) const override;
+    Value getPropertyDefaultValueInternal(const std::string&) const override;
     const variant<std::string, Tileset> urlOrTileset;
 };
 

@@ -76,5 +76,13 @@ Value TilesetSource::getPropertyInternal(const std::string& name) const {
     return Value();
 }
 
+Value TilesetSource::getPropertyDefaultValueInternal(const std::string& name) const {
+    using namespace conversion;
+    if (name == "scheme") return makeValue(TilesetScheme::XYZ);
+    if (name == "minzoom") return 0u;
+    if (name == "maxzoom") return util::DEFAULT_MAX_ZOOM;
+    return Value();
+}
+
 } // namespace style
 } // namespace mbgl
