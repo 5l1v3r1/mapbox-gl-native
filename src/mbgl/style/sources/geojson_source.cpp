@@ -1,7 +1,9 @@
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/style/conversion/constant.hpp>
 #include <mbgl/style/conversion/geojson.hpp>
+#include <mbgl/style/conversion/geojson_options.hpp>
 #include <mbgl/style/conversion/json.hpp>
+#include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/source_observer.hpp>
 #include <mbgl/style/sources/geojson_source.hpp>
@@ -152,6 +154,18 @@ optional<conversion::Error> GeoJSONSource::setPropertyInternal(const std::string
         }
     }
     return error;
+}
+
+Value GeoJSONSource::getPropertyInternal(const std::string& name) const {
+    using namespace conversion;
+    if (name == "options") return makeValue(getOptions());
+    return Value();
+}
+
+Value GeoJSONSource::getPropertyDefaultValueInternal(const std::string& name) const {
+    using namespace conversion;
+    if (name == "options") return makeValue(*GeoJSONOptions::defaultOptions());
+    return Value();
 }
 
 Value GeoJSONSource::serialize() const {

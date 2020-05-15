@@ -154,6 +154,20 @@ optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Convertible
     return { std::move(options) };
 }
 
+Value ValueFactory<GeoJSONOptions>::make(const GeoJSONOptions& options) {
+    mapbox::base::ValueObject result;
+    result["minzoom"] = options.minzoom;
+    result["maxzoom"] = options.maxzoom;
+    result["tileSize"] = options.tileSize;
+    result["buffer"] = options.buffer;
+    result["tolerance"] = options.tolerance;
+    result["lineMetrics"] = options.lineMetrics;
+    result["cluster"] = options.cluster;
+    result["clusterRadius"] = options.clusterRadius;
+    result["clusterMaxZoom"] = options.clusterMaxZoom;
+    return result;
+};
+
 } // namespace conversion
 } // namespace style
 } // namespace mbgl

@@ -21,6 +21,8 @@ public:
     Value serialize() const override;
 
 protected:
+    Value getPropertyInternal(const std::string&) const override;
+    Value getPropertyDefaultValueInternal(const std::string&) const override;
     Mutable<Source::Impl> createMutable() const noexcept final;
     Mutable<Source::Impl> createMutable(Tileset tileset) const noexcept final;
 };

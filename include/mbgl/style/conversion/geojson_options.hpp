@@ -13,6 +13,11 @@ struct Converter<GeoJSONOptions> {
     optional<GeoJSONOptions> operator()(const Convertible& value, Error& error) const;
 };
 
+template <>
+struct ValueFactory<GeoJSONOptions> {
+    static Value make(const GeoJSONOptions&);
+};
+
 } // namespace conversion
 } // namespace style
 } // namespace mbgl

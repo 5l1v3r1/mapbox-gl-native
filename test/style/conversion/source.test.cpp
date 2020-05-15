@@ -12,6 +12,7 @@ namespace {
 std::unique_ptr<Source> parseSource(const std::string& src, const std::string& sourceName) {
     Error error;
     auto source = convertJSON<std::unique_ptr<mbgl::style::Source>>(src, error, sourceName);
+    EXPECT_NE(nullopt, source) << sourceName << " source creation: " << error.message;
     if (source) return std::move(*source);
     return nullptr;
 }
@@ -110,4 +111,34 @@ TEST(StyleConversion, GetSourceGenericPropertyDefaultValues) {
     checkGetPropertyDefaultValue(source, "minzoom", 0u);
     checkGetPropertyDefaultValue(source, "maxzoom", 22u);
     checkGetPropertyDefaultValue(source, "scheme", "xyz");
+
+    source = parseSource(R"JSON({
+        "type": "geojson",
+        "data": "http://127.0.0.1:3000/geojson.json"
+    })JSON",
+                         "geojson_source");
+
+    ASSERT_NE(nullptr, source);
+    mapbox::base::ValueObject expected;
+    expected["minzoom"] = 0u;
+    expected["maxzoom"] = 18u;
+    expected["tileSize"] = 512u;
+    expected["buffer"] = 128u;
+    expected["tolerance"] = 0.375;
+    expected["lineMetrics"] = false;
+    expected["cluster"] = false;
+    expected["clusterRadius"] = 50u;
+    expected["clusterMaxZoom"] = 17u;
+    checkGetPropertyDefaultValue(source, "options", expected);
+
+    source = parseSource(R"JSON({
+        "type": "raster-dem",
+        "encoding": "terrarium",
+        "tiles": [
+            "local://tiles/{z}-{x}-{y}.terrain.png"
+        ]
+    })JSON",
+                         "rasterdem_source");
+    ASSERT_NE(nullptr, source);
+    checkGetPropertyDefaultValue(source, "encoding", "mapbox");
 }
