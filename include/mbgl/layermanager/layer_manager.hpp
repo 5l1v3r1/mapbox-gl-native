@@ -44,6 +44,8 @@ public:
     /// Returns a new Layout instance on success call; returns `nullptr` otherwise. 
     std::unique_ptr<Layout> createLayout(const LayoutParameters&, std::unique_ptr<GeometryTileLayer>,
                                          const std::vector<Immutable<style::LayerProperties>>&) noexcept;
+    /// Returns the default value for the given layer type and property name.
+    style::StyleProperty getPropertyDefaultValue(const std::string& type, const std::string& property);
 
     /**
      * @brief a build-time flag to enable/disable annotations in mapbox-gl-native core.

@@ -38,4 +38,8 @@ std::unique_ptr<RenderLayer> LineLayerFactory::createRenderLayer(Immutable<style
     return std::make_unique<RenderLineLayer>(staticImmutableCast<style::LineLayer::Impl>(impl));
 }
 
+style::StyleProperty LineLayerFactory::getPropertyDefaultValue(const std::string& property) const noexcept {
+    return style::LineLayer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

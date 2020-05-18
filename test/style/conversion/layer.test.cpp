@@ -165,32 +165,3 @@ TEST(StyleConversion, SetLayerGenericProperties) {
     layer->setProperty("maxzoom", Convertible(&newMaxZoom));
     EXPECT_EQ(22.0f, layer->getMaxZoom());
 }
-
-TEST(StyleConversion, GetLayerGenericPropertyDefaultValues) {
-    auto layer = parseLayer(R"JSON({
-        "type": "symbol",
-        "id": "symbol",
-        "source": "composite"
-    })JSON");
-
-    ASSERT_NE(nullptr, layer);
-    StyleProperty maxzoom = layer->getPropertyDefaultValue("maxzoom");
-    EXPECT_EQ(StyleProperty::Kind::Constant, maxzoom.getKind());
-    EXPECT_EQ(Value(std::numeric_limits<double>::infinity()), maxzoom.getValue());
-
-    StyleProperty minzoom = layer->getPropertyDefaultValue("minzoom");
-    EXPECT_EQ(StyleProperty::Kind::Constant, minzoom.getKind());
-    EXPECT_EQ(Value(-std::numeric_limits<double>::infinity()), minzoom.getValue());
-
-    StyleProperty visibility = layer->getPropertyDefaultValue("visibility");
-    EXPECT_EQ(StyleProperty::Kind::Constant, visibility.getKind());
-    EXPECT_EQ(Value("visible"), visibility.getValue());
-
-    StyleProperty symbolSpacing = layer->getPropertyDefaultValue("symbol-spacing");
-    EXPECT_EQ(StyleProperty::Kind::Constant, symbolSpacing.getKind());
-    EXPECT_EQ(Value(SymbolSpacing::defaultValue()), symbolSpacing.getValue());
-
-    StyleProperty nonexistent = layer->getPropertyDefaultValue("nonexistent");
-    EXPECT_EQ(StyleProperty::Kind::Undefined, nonexistent.getKind());
-    EXPECT_EQ(Value(), nonexistent.getValue());
-}

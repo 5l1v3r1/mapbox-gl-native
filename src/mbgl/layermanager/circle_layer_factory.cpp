@@ -33,4 +33,8 @@ std::unique_ptr<RenderLayer> CircleLayerFactory::createRenderLayer(Immutable<sty
     return std::make_unique<RenderCircleLayer>(staticImmutableCast<style::CircleLayer::Impl>(impl));
 }
 
+style::StyleProperty CircleLayerFactory::getPropertyDefaultValue(const std::string& property) const noexcept {
+    return style::CircleLayer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

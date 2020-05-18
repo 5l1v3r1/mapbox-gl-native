@@ -20,4 +20,8 @@ std::unique_ptr<RenderLayer> BackgroundLayerFactory::createRenderLayer(Immutable
     return std::make_unique<RenderBackgroundLayer>(staticImmutableCast<style::BackgroundLayer::Impl>(impl));
 }
 
+style::StyleProperty BackgroundLayerFactory::getPropertyDefaultValue(const std::string& property) const noexcept {
+    return style::BackgroundLayer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

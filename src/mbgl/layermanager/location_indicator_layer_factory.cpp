@@ -22,4 +22,9 @@ std::unique_ptr<RenderLayer> LocationIndicatorLayerFactory::createRenderLayer(
         staticImmutableCast<style::LocationIndicatorLayer::Impl>(impl));
 }
 
+style::StyleProperty LocationIndicatorLayerFactory::getPropertyDefaultValue(const std::string& property) const
+    noexcept {
+    return style::LocationIndicatorLayer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

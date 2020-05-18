@@ -684,10 +684,11 @@ StyleProperty LocationIndicatorLayer::getPropertyInternal(const std::string& nam
     return getLayerProperty(*this, name);
 }
 
-StyleProperty LocationIndicatorLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+// static
+StyleProperty LocationIndicatorLayer::getPropertyDefaultValue(const std::string& name) {
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) {
-        return {};
+        return Layer::getPropertyDefaultValue(name);
     }
 
     switch (static_cast<Property>(it->second)) {

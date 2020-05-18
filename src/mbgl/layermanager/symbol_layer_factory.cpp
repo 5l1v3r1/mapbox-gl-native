@@ -30,4 +30,8 @@ std::unique_ptr<RenderLayer> SymbolLayerFactory::createRenderLayer(Immutable<sty
     return std::make_unique<RenderSymbolLayer>(staticImmutableCast<style::SymbolLayer::Impl>(impl));
 }
 
+style::StyleProperty SymbolLayerFactory::getPropertyDefaultValue(const std::string& property) const noexcept {
+    return style::SymbolLayer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

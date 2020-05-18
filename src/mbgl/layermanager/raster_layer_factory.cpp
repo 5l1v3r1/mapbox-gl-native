@@ -25,4 +25,8 @@ std::unique_ptr<RenderLayer> RasterLayerFactory::createRenderLayer(Immutable<sty
     return std::make_unique<RenderRasterLayer>(staticImmutableCast<style::RasterLayer::Impl>(impl));
 }
 
+style::StyleProperty RasterLayerFactory::getPropertyDefaultValue(const std::string& property) const noexcept {
+    return style::RasterLayer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

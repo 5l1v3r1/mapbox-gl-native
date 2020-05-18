@@ -1,5 +1,6 @@
 #include <mbgl/gl/custom_layer.hpp>
 #include <mbgl/gl/custom_layer_impl.hpp>
+#include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/style/conversion/filter.hpp>
 #include <mbgl/style/conversion/json.hpp>
 #include <mbgl/style/expression/dsl.hpp>
@@ -411,4 +412,32 @@ TEST(Layer, SymbolLayerOverrides) {
         MockOverrides::updateOverrides(paint, updated);
         EXPECT_FALSE(updated.get<TextColor>().isConstant());
     }
+}
+
+namespace {
+
+void checkGetPropertyDefaultValue(const std::string& layerType,
+                                  const std::string& property,
+                                  const mbgl::Value& expected) {
+    auto result = LayerManager::get()->getPropertyDefaultValue(layerType, property);
+    EXPECT_EQ(expected, result.getValue()) << layerType << " layer, " << property << " property";
+    if (expected) {
+        EXPECT_NE(StyleProperty::Kind::Undefined, result.getKind())
+            << layerType << " layer, " << property << " property";
+    } else {
+        EXPECT_EQ(StyleProperty::Kind::Undefined, result.getKind())
+            << layerType << " layer, " << property << " property";
+    }
+}
+
+} // namespace
+
+TEST(Layer, GetLayerPropertyDefaultValues) {
+    using namespace mbgl::style;
+    checkGetPropertyDefaultValue("symbol", "maxzoom", std::numeric_limits<double>::infinity());
+    checkGetPropertyDefaultValue("symbol", "minzoom", -std::numeric_limits<double>::infinity());
+    checkGetPropertyDefaultValue("symbol", "visibility", "visible");
+    checkGetPropertyDefaultValue("symbol", "symbol-spacing", SymbolSpacing::defaultValue());
+    checkGetPropertyDefaultValue("line", "symbol-spacing", {});
+    checkGetPropertyDefaultValue("nonexistent", "nonexistent", {});
 }

@@ -37,4 +37,8 @@ std::unique_ptr<Layout> LayerFactory::createLayout(const LayoutParameters&,
     return nullptr;
 }
 
+style::StyleProperty LayerFactory::getPropertyDefaultValue(const std::string& property) const noexcept {
+    return style::Layer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

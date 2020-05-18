@@ -40,4 +40,8 @@ std::unique_ptr<RenderLayer> FillLayerFactory::createRenderLayer(Immutable<style
     return std::make_unique<RenderFillLayer>(staticImmutableCast<style::FillLayer::Impl>(impl));
 }
 
+style::StyleProperty FillLayerFactory::getPropertyDefaultValue(const std::string& property) const noexcept {
+    return style::FillLayer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

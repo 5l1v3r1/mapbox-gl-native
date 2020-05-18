@@ -258,12 +258,13 @@ StyleProperty Layer::getProperty(const std::string& name) const {
     return getPropertyInternal(name);
 }
 
-StyleProperty Layer::getPropertyDefaultValue(const std::string& name) const {
+// static
+StyleProperty Layer::getPropertyDefaultValue(const std::string& name) {
     const auto it = layerProperties.find(name.c_str());
     if (it != layerProperties.end()) {
         return getLayerPropertyDefaultValue(static_cast<Property>(it->second));
     }
-    return getPropertyDefaultValueInternal(name);
+    return {};
 }
 
 optional<conversion::Error> Layer::setVisibility(const conversion::Convertible& value) {
@@ -286,10 +287,6 @@ optional<conversion::Error> Layer::setVisibility(const conversion::Convertible& 
 
 const LayerTypeInfo* Layer::getTypeInfo() const noexcept {
     return baseImpl->getTypeInfo();
-}
-
-StyleProperty Layer::getPropertyDefaultValueInternal(const std::string&) const {
-    return {};
 }
 
 } // namespace style

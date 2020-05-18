@@ -33,4 +33,8 @@ std::unique_ptr<RenderLayer> FillExtrusionLayerFactory::createRenderLayer(Immuta
     return std::make_unique<RenderFillExtrusionLayer>(staticImmutableCast<style::FillExtrusionLayer::Impl>(impl));
 }
 
+style::StyleProperty FillExtrusionLayerFactory::getPropertyDefaultValue(const std::string& property) const noexcept {
+    return style::FillExtrusionLayer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

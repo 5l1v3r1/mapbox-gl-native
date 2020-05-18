@@ -25,4 +25,8 @@ std::unique_ptr<RenderLayer> HillshadeLayerFactory::createRenderLayer(Immutable<
     return std::make_unique<RenderHillshadeLayer>(staticImmutableCast<style::HillshadeLayer::Impl>(impl));
 }
 
+style::StyleProperty HillshadeLayerFactory::getPropertyDefaultValue(const std::string& property) const noexcept {
+    return style::HillshadeLayer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

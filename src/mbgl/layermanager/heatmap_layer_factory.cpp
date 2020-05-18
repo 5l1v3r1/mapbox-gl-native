@@ -29,4 +29,8 @@ std::unique_ptr<RenderLayer> HeatmapLayerFactory::createRenderLayer(Immutable<st
     return std::make_unique<RenderHeatmapLayer>(staticImmutableCast<style::HeatmapLayer::Impl>(impl));
 }
 
+style::StyleProperty HeatmapLayerFactory::getPropertyDefaultValue(const std::string& property) const noexcept {
+    return style::HeatmapLayer::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

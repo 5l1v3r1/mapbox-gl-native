@@ -800,10 +800,11 @@ StyleProperty LineLayer::getPropertyInternal(const std::string& name) const {
     return getLayerProperty(*this, name);
 }
 
-StyleProperty LineLayer::getPropertyDefaultValueInternal(const std::string& name) const {
+// static
+StyleProperty LineLayer::getPropertyDefaultValue(const std::string& name) {
     const auto it = layerProperties.find(name.c_str());
     if (it == layerProperties.end()) {
-        return {};
+        return Layer::getPropertyDefaultValue(name);
     }
 
     switch (static_cast<Property>(it->second)) {

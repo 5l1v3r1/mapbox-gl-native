@@ -53,4 +53,11 @@ std::unique_ptr<RenderLayer> LayerManager::createRenderLayer(Immutable<style::La
     return factory->createRenderLayer(std::move(impl));
 }
 
+style::StyleProperty LayerManager::getPropertyDefaultValue(const std::string& type, const std::string& property) {
+    if (LayerFactory* factory = getFactory(type)) {
+        return factory->getPropertyDefaultValue(property);
+    }
+    return {};
+}
+
 } // namespace mbgl

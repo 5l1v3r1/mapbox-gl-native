@@ -34,6 +34,8 @@ public:
     virtual std::unique_ptr<Bucket> createBucket(const BucketParameters&, const std::vector<Immutable<style::LayerProperties>>&) noexcept;
     /// Returns a new Layout instance on success call; returns `nullptr` otherwise. 
     virtual std::unique_ptr<Layout> createLayout(const LayoutParameters&, std::unique_ptr<GeometryTileLayer>, const std::vector<Immutable<style::LayerProperties>>&) noexcept;
+    /// Returns the default value for the given source property
+    virtual style::StyleProperty getPropertyDefaultValue(const std::string& property) const noexcept;
 
 protected:
     optional<std::string> getSource(const style::conversion::Convertible& value) const noexcept;

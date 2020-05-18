@@ -104,12 +104,11 @@ public:
     Mutable<Impl> mutableImpl() const;
     LocationIndicatorLayer(Immutable<Impl>);
     std::unique_ptr<Layer> cloneRef(const std::string& id) const final;
-
+    static StyleProperty getPropertyDefaultValue(const std::string&);
 protected:
     // Dynamic properties
     optional<conversion::Error> setPropertyInternal(const std::string& name, const conversion::Convertible& value) final;
     StyleProperty getPropertyInternal(const std::string& name) const final;
-    StyleProperty getPropertyDefaultValueInternal(const std::string&) const final;
     Value serialize() const final;
 
     Mutable<Layer::Impl> mutableBaseImpl() const final;
