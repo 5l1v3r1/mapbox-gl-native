@@ -17,7 +17,7 @@ public class NativeActivityTest {
     @Rule
     public ActivityTestRule<NativeActivity> mActivityTestRule = new ActivityTestRule<>(NativeActivity.class, false, false);
 
-    @Test(timeout = 1200000L)
+    @Test(timeout = 1800000L)
     public void runBenchmark() throws Exception {
         Log.v("Benchmark", "Start the benchmark");
         mActivityTestRule.launchActivity(null);
