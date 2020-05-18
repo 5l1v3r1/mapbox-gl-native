@@ -188,13 +188,13 @@ Value Source::getProperty(const std::string& name) const {
     }
     return getPropertyInternal(name);
 }
-
-Value Source::getPropertyDefaultValue(const std::string& name) const {
+// static
+Value Source::getPropertyDefaultValue(const std::string& name) {
     const auto it = sourceProperties.find(name.c_str());
     if (it != sourceProperties.end()) {
         return getSourcePropertyDefaultValue(static_cast<Property>(it->second));
     }
-    return getPropertyDefaultValueInternal(name);
+    return Value();
 }
 
 const SourceTypeInfo* Source::getTypeInfo() const noexcept {
@@ -217,10 +217,6 @@ optional<conversion::Error> Source::setPropertyInternal(const std::string& name,
 }
 
 Value Source::getPropertyInternal(const std::string&) const {
-    return NullValue();
-}
-
-Value Source::getPropertyDefaultValueInternal(const std::string&) const {
     return NullValue();
 }
 

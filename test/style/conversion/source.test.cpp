@@ -22,13 +22,6 @@ void checkGetProperty(std::unique_ptr<Source>& source, const std::string& proper
     EXPECT_EQ(expected, value) << "get property: " << propertyName;
 }
 
-void checkGetPropertyDefaultValue(std::unique_ptr<Source>& source,
-                                  const std::string& propertyName,
-                                  const mbgl::Value& expected) {
-    Value value = source->getPropertyDefaultValue(propertyName);
-    EXPECT_EQ(expected, value) << "get property: " << propertyName;
-}
-
 void checkSetProperty(std::unique_ptr<Source>& source, const std::string& propertyName, const JSValue& value) {
     auto error = source->setProperty(propertyName, Convertible(&value));
     EXPECT_EQ(nullopt, error) << "set property: " << propertyName << ", error: " << error->message;
@@ -90,55 +83,4 @@ TEST(StyleConversion, SetSourceGenericProperties) {
     const JSValue* geometry = &document;
     checkSetProperty(source, "data", *geometry);
     EXPECT_TRUE(geojsonSource->getGeoJSONData());
-}
-
-TEST(StyleConversion, GetSourceGenericPropertyDefaultValues) {
-    auto source = parseSource(R"JSON({
-        "type": "vector",
-        "tiles": ["http://example.com/{z}-{x}-{y}.vector.pbf"],
-        "scheme": "tms",
-        "minzoom": 11,
-        "maxzoom": 16,
-        "attribution": "mapbox",
-        "bounds": [-180, -73, -120, 73]
-    })JSON",
-                              "vector_source");
-
-    ASSERT_NE(nullptr, source);
-    checkGetPropertyDefaultValue(source, "volatile", false);
-    checkGetPropertyDefaultValue(source, "minimum-tile-update-interval", 0.0);
-    checkGetPropertyDefaultValue(source, "prefetch-zoom-delta", 4u);
-    checkGetPropertyDefaultValue(source, "minzoom", 0u);
-    checkGetPropertyDefaultValue(source, "maxzoom", 22u);
-    checkGetPropertyDefaultValue(source, "scheme", "xyz");
-
-    source = parseSource(R"JSON({
-        "type": "geojson",
-        "data": "http://127.0.0.1:3000/geojson.json"
-    })JSON",
-                         "geojson_source");
-
-    ASSERT_NE(nullptr, source);
-    mapbox::base::ValueObject expected;
-    expected["minzoom"] = 0u;
-    expected["maxzoom"] = 18u;
-    expected["tileSize"] = 512u;
-    expected["buffer"] = 128u;
-    expected["tolerance"] = 0.375;
-    expected["lineMetrics"] = false;
-    expected["cluster"] = false;
-    expected["clusterRadius"] = 50u;
-    expected["clusterMaxZoom"] = 17u;
-    checkGetPropertyDefaultValue(source, "options", expected);
-
-    source = parseSource(R"JSON({
-        "type": "raster-dem",
-        "encoding": "terrarium",
-        "tiles": [
-            "local://tiles/{z}-{x}-{y}.terrain.png"
-        ]
-    })JSON",
-                         "rasterdem_source");
-    ASSERT_NE(nullptr, source);
-    checkGetPropertyDefaultValue(source, "encoding", "mapbox");
 }

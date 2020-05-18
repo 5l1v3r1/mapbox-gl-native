@@ -21,4 +21,8 @@ std::unique_ptr<RenderSource> CustomGeometrySourceFactory::createRenderSource(
     return std::make_unique<RenderCustomGeometrySource>(staticImmutableCast<style::CustomGeometrySource::Impl>(impl));
 }
 
+Value CustomGeometrySourceFactory::getPropertyDefaultValue(const std::string& property) noexcept {
+    return style::CustomGeometrySource::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

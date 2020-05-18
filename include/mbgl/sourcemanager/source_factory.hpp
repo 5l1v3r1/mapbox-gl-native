@@ -32,6 +32,9 @@ public:
 
     /// Returns a new RenderSource instance.
     virtual std::unique_ptr<RenderSource> createRenderSource(Immutable<style::Source::Impl>) noexcept = 0;
+
+    /// Returns the default value for the given source property
+    virtual Value getPropertyDefaultValue(const std::string& property) noexcept = 0;
 };
 
 } // namespace mbgl

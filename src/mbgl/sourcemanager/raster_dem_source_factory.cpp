@@ -39,4 +39,8 @@ std::unique_ptr<RenderSource> RasterDEMSourceFactory::createRenderSource(Immutab
     return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<style::RasterDEMSource::Impl>(impl));
 }
 
+Value RasterDEMSourceFactory::getPropertyDefaultValue(const std::string& property) noexcept {
+    return style::RasterDEMSource::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

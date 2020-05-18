@@ -81,11 +81,12 @@ public:
 
     Value serialize() const override;
 
+    static Value getPropertyDefaultValue(const std::string&);
+
 protected:
     optional<conversion::Error> setPropertyInternal(const std::string& name,
                                                     const conversion::Convertible& value) override;
     Value getPropertyInternal(const std::string&) const override;
-    Value getPropertyDefaultValueInternal(const std::string&) const override;
     Mutable<Source::Impl> createMutable() const noexcept final;
 
 private:

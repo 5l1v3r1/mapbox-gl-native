@@ -20,4 +20,8 @@ std::unique_ptr<RenderSource> AnnotationSourceFactory::createRenderSource(
     return std::make_unique<RenderAnnotationSource>(staticImmutableCast<AnnotationSource::Impl>(impl));
 }
 
+Value AnnotationSourceFactory::getPropertyDefaultValue(const std::string& property) noexcept {
+    return AnnotationSource::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

@@ -24,4 +24,11 @@ std::unique_ptr<RenderSource> SourceManager::createRenderSource(Immutable<style:
     return factory->createRenderSource(std::move(impl));
 }
 
+Value SourceManager::getPropertyDefaultValue(const std::string& type, const std::string& property) {
+    if (SourceFactory* factory = getFactory(type)) {
+        return factory->getPropertyDefaultValue(property);
+    }
+    return NullValue();
+}
+
 } // namespace mbgl

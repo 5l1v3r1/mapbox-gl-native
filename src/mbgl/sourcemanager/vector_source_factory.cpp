@@ -46,4 +46,8 @@ std::unique_ptr<RenderSource> VectorSourceFactory::createRenderSource(Immutable<
     return std::make_unique<RenderVectorSource>(staticImmutableCast<style::VectorSource::Impl>(impl));
 }
 
+Value VectorSourceFactory::getPropertyDefaultValue(const std::string& property) noexcept {
+    return style::VectorSource::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

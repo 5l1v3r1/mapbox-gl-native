@@ -40,4 +40,8 @@ std::unique_ptr<RenderSource> RasterSourceFactory::createRenderSource(Immutable<
     return std::make_unique<RenderRasterSource>(staticImmutableCast<style::RasterSource::Impl>(impl));
 }
 
+Value RasterSourceFactory::getPropertyDefaultValue(const std::string& property) noexcept {
+    return style::RasterSource::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

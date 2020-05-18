@@ -162,10 +162,11 @@ Value GeoJSONSource::getPropertyInternal(const std::string& name) const {
     return Value();
 }
 
-Value GeoJSONSource::getPropertyDefaultValueInternal(const std::string& name) const {
+// static
+Value GeoJSONSource::getPropertyDefaultValue(const std::string& name) {
     using namespace conversion;
     if (name == "options") return makeValue(*GeoJSONOptions::defaultOptions());
-    return Value();
+    return Source::getPropertyDefaultValue(name);
 }
 
 Value GeoJSONSource::serialize() const {

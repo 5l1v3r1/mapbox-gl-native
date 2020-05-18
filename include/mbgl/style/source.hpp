@@ -166,7 +166,7 @@ public:
 
     optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
     Value getProperty(const std::string&) const;
-    Value getPropertyDefaultValue(const std::string&) const;
+    static Value getPropertyDefaultValue(const std::string&);
 
     virtual mapbox::base::WeakPtr<Source> makeWeakPtr() = 0;
     const SourceTypeInfo* getTypeInfo() const noexcept;
@@ -180,7 +180,6 @@ protected:
     virtual optional<conversion::Error> setPropertyInternal(const std::string& name,
                                                             const conversion::Convertible& value);
     virtual Value getPropertyInternal(const std::string&) const;
-    virtual Value getPropertyDefaultValueInternal(const std::string&) const;
 };
 
 } // namespace style

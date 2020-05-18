@@ -985,3 +985,34 @@ TEST(Source, SetMaxParentOverscaleFactor) {
             {EventSeverity::Warning, Event::Style, -1, "Parent tile overscale factor will cap prefetch delta to 3"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
+
+namespace {
+
+void checkGetPropertyDefaultValue(const std::string& sourceType, const std::string& property, const Value& expected) {
+    auto value = SourceManager::get()->getPropertyDefaultValue(sourceType, property);
+    EXPECT_EQ(expected, value);
+}
+
+} // namespace
+
+TEST(Source, GetSourceGenericPropertyDefaultValues) {
+    checkGetPropertyDefaultValue("vector", "volatile", false);
+    checkGetPropertyDefaultValue("vector", "minimum-tile-update-interval", 0.0);
+    checkGetPropertyDefaultValue("vector", "prefetch-zoom-delta", 4u);
+    checkGetPropertyDefaultValue("vector", "minzoom", 0u);
+    checkGetPropertyDefaultValue("vector", "maxzoom", 22u);
+    checkGetPropertyDefaultValue("vector", "scheme", "xyz");
+
+    mapbox::base::ValueObject expected;
+    expected["minzoom"] = 0u;
+    expected["maxzoom"] = 18u;
+    expected["tileSize"] = 512u;
+    expected["buffer"] = 128u;
+    expected["tolerance"] = 0.375;
+    expected["lineMetrics"] = false;
+    expected["cluster"] = false;
+    expected["clusterRadius"] = 50u;
+    expected["clusterMaxZoom"] = 17u;
+    checkGetPropertyDefaultValue("geojson", "options", expected);
+    checkGetPropertyDefaultValue("raster-dem", "encoding", "mapbox");
+}

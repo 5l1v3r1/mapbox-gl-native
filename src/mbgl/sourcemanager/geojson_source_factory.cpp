@@ -40,4 +40,8 @@ std::unique_ptr<RenderSource> GeoJSONSourceFactory::createRenderSource(Immutable
     return std::make_unique<RenderGeoJSONSource>(staticImmutableCast<style::GeoJSONSource::Impl>(impl));
 }
 
+Value GeoJSONSourceFactory::getPropertyDefaultValue(const std::string& property) noexcept {
+    return style::GeoJSONSource::getPropertyDefaultValue(property);
+}
+
 } // namespace mbgl

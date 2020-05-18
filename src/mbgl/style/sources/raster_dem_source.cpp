@@ -44,11 +44,12 @@ Value RasterDEMSource::getPropertyInternal(const std::string& name) const {
     return NullValue();
 }
 
-Value RasterDEMSource::getPropertyDefaultValueInternal(const std::string& name) const {
+// static
+Value RasterDEMSource::getPropertyDefaultValue(const std::string& name) {
     if (name == "encoding") {
         return conversion::makeValue(TilesetDEMEncoding::Mapbox);
     }
-    return NullValue();
+    return RasterSource::getPropertyDefaultValue(name);
 }
 
 Mutable<Source::Impl> RasterDEMSource::createMutable() const noexcept {

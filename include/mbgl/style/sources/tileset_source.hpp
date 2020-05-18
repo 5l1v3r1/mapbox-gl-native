@@ -17,11 +17,11 @@ public:
     optional<std::string> getURL() const;
 
     Value serialize() const override;
+    static Value getPropertyDefaultValue(const std::string&);
 
 protected:
     TilesetSource(Immutable<Impl>, variant<std::string, Tileset> urlOrTileset);
     Value getPropertyInternal(const std::string&) const override;
-    Value getPropertyDefaultValueInternal(const std::string&) const override;
     const variant<std::string, Tileset> urlOrTileset;
 };
 

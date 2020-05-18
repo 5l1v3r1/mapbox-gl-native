@@ -11,6 +11,7 @@ protected:
                                                 const style::conversion::Convertible& value,
                                                 style::conversion::Error&) noexcept final;
     std::unique_ptr<RenderSource> createRenderSource(Immutable<style::Source::Impl>) noexcept final;
+    Value getPropertyDefaultValue(const std::string& property) noexcept final;
 };
 
 } // namespace mbgl

@@ -40,6 +40,9 @@ public:
     /// Returns a new RenderSource instance on success call; returns `nullptr` otherwise.
     std::unique_ptr<RenderSource> createRenderSource(Immutable<style::Source::Impl>) noexcept;
 
+    /// Returns the default value for the given source type and property name.
+    Value getPropertyDefaultValue(const std::string& type, const std::string& property);
+
 protected:
     virtual ~SourceManager() = default;
     virtual SourceFactory* getFactory(const std::string& type) noexcept = 0;
