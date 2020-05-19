@@ -146,6 +146,8 @@ public:
                sw.longitude() > ne.longitude();
     }
 
+    bool isBounded() const { return bounded; }
+
     bool crossesAntimeridian() const {
         return (sw.wrapped().longitude() > ne.wrapped().longitude());
     }
