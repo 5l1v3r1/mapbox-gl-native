@@ -47,6 +47,9 @@ const CircleLayer::Impl& CircleLayer::impl() const {
 }
 
 Mutable<CircleLayer::Impl> CircleLayer::mutableImpl() const {
+    if (initializing) {
+        return constImmutableCast<Impl, Layer::Impl>(baseImpl);
+    }
     return makeMutable<Impl>(impl());
 }
 

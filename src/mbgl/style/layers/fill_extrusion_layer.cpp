@@ -47,6 +47,9 @@ const FillExtrusionLayer::Impl& FillExtrusionLayer::impl() const {
 }
 
 Mutable<FillExtrusionLayer::Impl> FillExtrusionLayer::mutableImpl() const {
+    if (initializing) {
+        return constImmutableCast<Impl, Layer::Impl>(baseImpl);
+    }
     return makeMutable<Impl>(impl());
 }
 

@@ -47,6 +47,9 @@ const SymbolLayer::Impl& SymbolLayer::impl() const {
 }
 
 Mutable<SymbolLayer::Impl> SymbolLayer::mutableImpl() const {
+    if (initializing) {
+        return constImmutableCast<Impl, Layer::Impl>(baseImpl);
+    }
     return makeMutable<Impl>(impl());
 }
 

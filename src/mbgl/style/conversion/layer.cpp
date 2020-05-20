@@ -10,9 +10,9 @@ namespace style {
 namespace conversion {
 
 namespace {
-bool setObjectMember(std::unique_ptr<Layer>& layer, const Convertible& value, const char* member, Error& error) {
+bool setObjectMember(LayerInitializer& layer, const Convertible& value, const char* member, Error& error) {
     if (auto memberValue = objectMember(value, member)) {
-        if (auto error_ = layer->setProperty(member, *memberValue)) {
+        if (auto error_ = layer.setProperty(member, *memberValue)) {
             error = *error_;
             return false;
         }
@@ -21,7 +21,7 @@ bool setObjectMember(std::unique_ptr<Layer>& layer, const Convertible& value, co
 }
 } // namespace
 
-optional<Error> setPaintProperties(Layer& layer, const Convertible& value) {
+optional<Error> setPaintProperties(LayerInitializer& layer, const Convertible& value) {
     auto paintValue = objectMember(value, "paint");
     if (!paintValue) {
         return nullopt;
@@ -62,14 +62,14 @@ optional<std::unique_ptr<Layer>> Converter<std::unique_ptr<Layer>>::operator()(c
         return nullopt;
     }
 
-    std::unique_ptr<Layer> layer = LayerManager::get()->createLayer(*type, *id, value, error);
+    auto layer = LayerManager::get()->createLayer(*type, *id, value, error);
     if (!layer) return nullopt;
-
-    if (!setObjectMember(layer, value, "minzoom", error)) return nullopt;
-    if (!setObjectMember(layer, value, "maxzoom", error)) return nullopt;
-    if (!setObjectMember(layer, value, "filter", error)) return nullopt;
-    if (layer->getTypeInfo()->source == LayerTypeInfo::Source::Required) {
-        if (!setObjectMember(layer, value, "source-layer", error)) return nullopt;
+    LayerInitializer initializer{std::move(layer)};
+    if (!setObjectMember(initializer, value, "minzoom", error)) return nullopt;
+    if (!setObjectMember(initializer, value, "maxzoom", error)) return nullopt;
+    if (!setObjectMember(initializer, value, "filter", error)) return nullopt;
+    if (initializer.getTypeInfo()->source == LayerTypeInfo::Source::Required) {
+        if (!setObjectMember(initializer, value, "source-layer", error)) return nullopt;
     }
 
     auto layoutValue = objectMember(value, "layout");
@@ -79,20 +79,20 @@ optional<std::unique_ptr<Layer>> Converter<std::unique_ptr<Layer>>::operator()(c
             return nullopt;
         }
         optional<Error> error_ = eachMember(
-            *layoutValue, [&](const std::string& k, const Convertible& v) { return layer->setProperty(k, v); });
+            *layoutValue, [&](const std::string& k, const Convertible& v) { return initializer.setProperty(k, v); });
         if (error_) {
             error = *error_;
             return nullopt;
         }
     }
 
-    optional<Error> error_ = setPaintProperties(*layer, value);
+    optional<Error> error_ = setPaintProperties(initializer, value);
     if (error_) {
         error = *error_;
         return nullopt;
     }
 
-    return layer;
+    return std::unique_ptr<Layer>(std::move(initializer));
 }
 
 } // namespace conversion

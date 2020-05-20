@@ -124,6 +124,9 @@ const <%- camelize(type) %>Layer::Impl& <%- camelize(type) %>Layer::impl() const
 }
 
 Mutable<<%- camelize(type) %>Layer::Impl> <%- camelize(type) %>Layer::mutableImpl() const {
+    if (initializing) {
+        return constImmutableCast<Impl, Layer::Impl>(baseImpl);
+    }
     return makeMutable<Impl>(impl());
 }
 

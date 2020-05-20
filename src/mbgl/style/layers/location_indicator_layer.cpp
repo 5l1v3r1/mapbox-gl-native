@@ -47,6 +47,9 @@ const LocationIndicatorLayer::Impl& LocationIndicatorLayer::impl() const {
 }
 
 Mutable<LocationIndicatorLayer::Impl> LocationIndicatorLayer::mutableImpl() const {
+    if (initializing) {
+        return constImmutableCast<Impl, Layer::Impl>(baseImpl);
+    }
     return makeMutable<Impl>(impl());
 }
 

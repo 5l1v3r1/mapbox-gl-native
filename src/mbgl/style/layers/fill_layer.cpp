@@ -47,6 +47,9 @@ const FillLayer::Impl& FillLayer::impl() const {
 }
 
 Mutable<FillLayer::Impl> FillLayer::mutableImpl() const {
+    if (initializing) {
+        return constImmutableCast<Impl, Layer::Impl>(baseImpl);
+    }
     return makeMutable<Impl>(impl());
 }
 

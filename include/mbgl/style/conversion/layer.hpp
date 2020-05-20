@@ -16,7 +16,7 @@ public:
     optional<std::unique_ptr<Layer>> operator()(const Convertible& value, Error& error) const;
 };
 
-optional<Error> setPaintProperties(Layer& layer, const Convertible& value);
+optional<Error> setPaintProperties(LayerInitializer&, const Convertible& value);
 
 } // namespace conversion
 } // namespace style

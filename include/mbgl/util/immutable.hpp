@@ -4,6 +4,9 @@
 
 namespace mbgl {
 
+template <class T>
+class Immutable;
+
 /**
  * `Mutable<T>` is a non-nullable uniquely owning reference to a `T`. It can be efficiently converted
  * to `Immutable<T>`.
@@ -42,6 +45,9 @@ private:
     template <class S, class... Args> friend Mutable<S> makeMutable(Args&&...);
     // NOLINTNEXTLINE(readability-redundant-declaration)
     template <class S, class U> friend Mutable<S> staticMutableCast(const Mutable<U>&);
+    // NOLINTNEXTLINE(readability-redundant-declaration)
+    template <class S, class U>
+    friend Mutable<S> constImmutableCast(const Immutable<U>&);
 };
 
 template <class T, class... Args>
@@ -83,6 +89,8 @@ public:
         return *this;
     }
 
+    auto useCount() const { return ptr.use_count(); }
+
     Immutable& operator=(Immutable&&) noexcept = default;
     Immutable& operator=(const Immutable&) = default;
 
@@ -108,11 +116,23 @@ private:
 
     // NOLINTNEXTLINE(readability-redundant-declaration)
     template <class S, class U> friend Immutable<S> staticImmutableCast(const Immutable<U>&);
+
+    template <class S, class U>
+    friend Mutable<S> constImmutableCast(const Immutable<U>&);
 };
 
 template <class S, class U>
 Immutable<S> staticImmutableCast(const Immutable<U>& u) {
     return Immutable<S>(std::static_pointer_cast<const S>(u.ptr));
+}
+
+// Note: this function is breaking the intended Mutable/Immutable design,
+// so its usage shall be limited.
+// The immutable object must be managed only by |u|.
+template <class S, class U>
+Mutable<S> constImmutableCast(const Immutable<U>& u) {
+    assert(u.useCount() == 1u);
+    return Mutable<S>(std::static_pointer_cast<S>(std::const_pointer_cast<U>(u.ptr)));
 }
 
 /**

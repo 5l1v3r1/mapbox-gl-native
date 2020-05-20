@@ -47,6 +47,9 @@ const BackgroundLayer::Impl& BackgroundLayer::impl() const {
 }
 
 Mutable<BackgroundLayer::Impl> BackgroundLayer::mutableImpl() const {
+    if (initializing) {
+        return constImmutableCast<Impl, Layer::Impl>(baseImpl);
+    }
     return makeMutable<Impl>(impl());
 }
 

@@ -47,6 +47,9 @@ const HillshadeLayer::Impl& HillshadeLayer::impl() const {
 }
 
 Mutable<HillshadeLayer::Impl> HillshadeLayer::mutableImpl() const {
+    if (initializing) {
+        return constImmutableCast<Impl, Layer::Impl>(baseImpl);
+    }
     return makeMutable<Impl>(impl());
 }
 

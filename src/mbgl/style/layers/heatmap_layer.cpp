@@ -47,6 +47,9 @@ const HeatmapLayer::Impl& HeatmapLayer::impl() const {
 }
 
 Mutable<HeatmapLayer::Impl> HeatmapLayer::mutableImpl() const {
+    if (initializing) {
+        return constImmutableCast<Impl, Layer::Impl>(baseImpl);
+    }
     return makeMutable<Impl>(impl());
 }
 

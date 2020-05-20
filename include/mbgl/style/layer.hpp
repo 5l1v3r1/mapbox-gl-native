@@ -127,7 +127,6 @@ public:
 
     
     void setObserver(LayerObserver*);
-
     // For use in SDK bindings, which store a reference to a platform-native peer
     // object here, so that separately-obtained references to this object share
     // identical platform-native peers.
@@ -147,12 +146,42 @@ protected:
                                                             const conversion::Convertible& value) = 0;
     virtual StyleProperty getPropertyInternal(const std::string&) const = 0;
     LayerObserver* observer;
+    friend class LayerInitializer;
+    bool initializing = false;
     mapbox::base::WeakPtrFactory<Layer> weakFactory {this};
 
 private:
     optional<conversion::Error> setVisibility(const conversion::Convertible& value);
     optional<conversion::Error> setMinZoom(const conversion::Convertible& value);
     optional<conversion::Error> setMaxZoom(const conversion::Convertible& value);
+};
+
+class LayerInitializer {
+public:
+    explicit LayerInitializer(std::unique_ptr<Layer> layer_) : layer(std::move(layer_)) {
+        assert(layer);
+        // The impl must be managed only by |layer|.
+        assert(layer->baseImpl.useCount() == 1u);
+        layer->initializing = true;
+    }
+
+    optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value) {
+        assert(layer);
+        return layer->setProperty(name, value);
+    }
+
+    const LayerTypeInfo* getTypeInfo() const {
+        assert(layer);
+        return layer->getTypeInfo();
+    }
+
+    explicit operator std::unique_ptr<Layer>() && {
+        layer->initializing = false;
+        return std::move(layer);
+    }
+
+private:
+    std::unique_ptr<Layer> layer;
 };
 
 } // namespace style

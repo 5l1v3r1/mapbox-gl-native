@@ -47,6 +47,9 @@ const RasterLayer::Impl& RasterLayer::impl() const {
 }
 
 Mutable<RasterLayer::Impl> RasterLayer::mutableImpl() const {
+    if (initializing) {
+        return constImmutableCast<Impl, Layer::Impl>(baseImpl);
+    }
     return makeMutable<Impl>(impl());
 }
 
