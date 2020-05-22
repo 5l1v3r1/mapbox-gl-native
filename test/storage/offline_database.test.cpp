@@ -431,32 +431,29 @@ TEST(OfflineDatabase, PutTileNotFound) {
 TEST(OfflineDatabase, CreateRegion) {
     FixtureLog log;
     OfflineDatabase db(":memory:");
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
+    const auto bounds = LatLngBounds::hull({1, 2}, {3, 4});
+    OfflineRegionDefinition definition{"http://example.com/style", bounds, 5, 6, 2.0, true};
     OfflineRegionMetadata metadata {{ 1, 2, 3 }};
     auto region = db.createRegion(definition, metadata);
     ASSERT_TRUE(region);
 
     EXPECT_EQ(0u, log.uncheckedCount());
+    const auto& def = region->getDefinition();
+    EXPECT_EQ(definition.styleURL, def.styleURL);
+    EXPECT_EQ(definition.minZoom, def.minZoom);
+    EXPECT_EQ(definition.maxZoom, def.maxZoom);
+    EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
+    EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
+    EXPECT_EQ(definition.isGeometryDefined(), def.isGeometryDefined());
 
-    region->getDefinition().match(
-            [&](OfflineTilePyramidRegionDefinition& def) {
-                EXPECT_EQ(definition.styleURL, def.styleURL);
-                EXPECT_EQ(definition.bounds, def.bounds);
-                EXPECT_EQ(definition.minZoom, def.minZoom);
-                EXPECT_EQ(definition.maxZoom, def.maxZoom);
-                EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
-                EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
-            }, [](auto&) {
-                EXPECT_FALSE(false);
-            }
-    );
+    def.location.match([&](LatLngBounds& bounds_) { EXPECT_EQ(bounds, bounds_); }, [](auto&) { EXPECT_FALSE(false); });
     EXPECT_EQ(metadata, region->getMetadata());
 }
 
 TEST(OfflineDatabase, UpdateMetadata) {
     FixtureLog log;
     OfflineDatabase db(":memory:");
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
+    OfflineRegionDefinition definition{"http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
     OfflineRegionMetadata metadata {{ 1, 2, 3 }};
     auto region = db.createRegion(definition, metadata);
     ASSERT_TRUE(region);
@@ -472,7 +469,8 @@ TEST(OfflineDatabase, UpdateMetadata) {
 TEST(OfflineDatabase, ListRegions) {
     FixtureLog log;
     OfflineDatabase db(":memory:");
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false };
+    OfflineRegionDefinition definition{
+        "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false};
     OfflineRegionMetadata metadata {{ 1, 2, 3 }};
 
     auto region = db.createRegion(definition, metadata);
@@ -482,18 +480,13 @@ TEST(OfflineDatabase, ListRegions) {
     ASSERT_EQ(1u, regions.size());
 
     EXPECT_EQ(region->getID(), regions.at(0).getID());
-    regions.at(0).getDefinition().match(
-            [&](OfflineTilePyramidRegionDefinition& def) {
-                EXPECT_EQ(definition.styleURL, def.styleURL);
-                EXPECT_EQ(definition.bounds, def.bounds);
-                EXPECT_EQ(definition.minZoom, def.minZoom);
-                EXPECT_EQ(definition.maxZoom, def.maxZoom);
-                EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
-                EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
-            },
-            [&](auto&) {
-                EXPECT_FALSE(false);
-            });
+    const auto& def = regions.at(0).getDefinition();
+    EXPECT_EQ(definition.styleURL, def.styleURL);
+    EXPECT_EQ(definition.location, def.location);
+    EXPECT_EQ(definition.minZoom, def.minZoom);
+    EXPECT_EQ(definition.maxZoom, def.maxZoom);
+    EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
+    EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
     EXPECT_EQ(metadata, regions.at(0).getMetadata());
 
     EXPECT_EQ(0u, log.uncheckedCount());
@@ -502,25 +495,21 @@ TEST(OfflineDatabase, ListRegions) {
 TEST(OfflineDatabase, GetRegionDefinition) {
     FixtureLog log;
     OfflineDatabase db(":memory:");
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false };
+    OfflineRegionDefinition definition{
+        "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false};
     OfflineRegionMetadata metadata {{ 1, 2, 3 }};
 
     EXPECT_EQ(0u, log.uncheckedCount());
 
     auto region = db.createRegion(definition, metadata);
-    db.getRegionDefinition(region->getID())->match(
-            [&](OfflineTilePyramidRegionDefinition& result) {
-                EXPECT_EQ(definition.styleURL, result.styleURL);
-                EXPECT_EQ(definition.bounds, result.bounds);
-                EXPECT_EQ(definition.minZoom, result.minZoom);
-                EXPECT_EQ(definition.maxZoom, result.maxZoom);
-                EXPECT_EQ(definition.pixelRatio, result.pixelRatio);
-                EXPECT_EQ(definition.includeIdeographs, result.includeIdeographs);
-            },
-            [&](auto&) {
-                EXPECT_FALSE(false);
-            }
-    );
+    auto result = db.getRegionDefinition(region->getID());
+    ASSERT_TRUE(result);
+    EXPECT_EQ(definition.styleURL, result->styleURL);
+    EXPECT_EQ(definition.location, result->location);
+    EXPECT_EQ(definition.minZoom, result->minZoom);
+    EXPECT_EQ(definition.maxZoom, result->maxZoom);
+    EXPECT_EQ(definition.pixelRatio, result->pixelRatio);
+    EXPECT_EQ(definition.includeIdeographs, result->includeIdeographs);
 }
 
 // Disabled due to flakiness: https://github.com/mapbox/mapbox-gl-native/issues/14966
@@ -546,7 +535,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
         OfflineDatabase db(filename);
         db.setMaximumAmbientCacheSize(maximumSize); // 50 MB
 
-        OfflineTilePyramidRegionDefinition definition{ "mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
+        OfflineRegionDefinition definition{"mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
         OfflineRegionMetadata metadata{{ 1, 2, 3 }};
 
         auto region = db.createRegion(definition, metadata);
@@ -690,7 +679,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
 
         OfflineDatabase db(filename);
 
-        OfflineTilePyramidRegionDefinition definition{ "mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
+        OfflineRegionDefinition definition{"mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
         OfflineRegionMetadata metadata{{ 1, 2, 3 }};
 
         auto region1 = db.createRegion(definition, metadata);
@@ -787,10 +776,10 @@ TEST(OfflineDatabase, MapboxTileLimitExceeded) {
         db.putRegionResource(regionID, tile, response);
     };
 
-    OfflineTilePyramidRegionDefinition definition1{ "mapbox://style1", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
+    OfflineRegionDefinition definition1{"mapbox://style1", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
     OfflineRegionMetadata metadata1{{ 1, 2, 3 }};
 
-    OfflineTilePyramidRegionDefinition definition2{ "mapbox://style2", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
+    OfflineRegionDefinition definition2{"mapbox://style2", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
     OfflineRegionMetadata metadata2{{ 1, 2, 3 }};
 
     auto region1 = db.createRegion(definition1, metadata1);
@@ -881,7 +870,7 @@ TEST(OfflineDatabase, Invalidate) {
     const Resource ambientStyle  = Resource::style("mapbox://style_ambient");
     db.put(ambientStyle, response);
 
-    OfflineTilePyramidRegionDefinition definition { "mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
+    OfflineRegionDefinition definition{"mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
     OfflineRegionMetadata metadata {{ 1, 2, 3 }};
 
     auto region1 = db.createRegion(definition, metadata);
@@ -989,17 +978,14 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ClearAmbientCache)) {
 TEST(OfflineDatabase, CreateRegionInfiniteMaxZoom) {
     FixtureLog log;
     OfflineDatabase db(":memory:");
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, false };
+    OfflineRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, false};
     OfflineRegionMetadata metadata;
     auto region = db.createRegion(definition, metadata);
     ASSERT_TRUE(region);
 
     EXPECT_EQ(0u, log.uncheckedCount());
-
-    region->getDefinition().match([&](auto& def) {
-        EXPECT_EQ(0, def.minZoom);
-        EXPECT_EQ(INFINITY, def.maxZoom);
-    });
+    EXPECT_EQ(0, region->getDefinition().minZoom);
+    EXPECT_EQ(INFINITY, region->getDefinition().maxZoom);
 }
 
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ConcurrentUse)) {
@@ -1091,8 +1077,7 @@ TEST(OfflineDatabase, OfflineRegionDoesNotAffectAmbientCacheSize) {
     // First 100KB ambient cache resource.
     db.put(Resource::style("http://example.com/ambient1.json"s), response);
 
-    OfflineTilePyramidRegionDefinition definition(
-        "http://example.com/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false);
+    OfflineRegionDefinition definition("http://example.com/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false);
     auto region = db.createRegion(definition, OfflineRegionMetadata());
 
     // 1MB of offline region data.
@@ -1118,7 +1103,7 @@ TEST(OfflineDatabase, PutRegionResourceDoesNotEvict) {
     OfflineDatabase db(":memory:");
     db.setMaximumAmbientCacheSize(1024 * 100);
 
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, true };
+    OfflineRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, true};
     auto region = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(region);
 
@@ -1157,7 +1142,8 @@ TEST(OfflineDatabase, PutFailsWhenEvictionInsuffices) {
 TEST(OfflineDatabase, GetRegionCompletedStatus) {
     FixtureLog log;
     OfflineDatabase db(":memory:");
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false };
+    OfflineRegionDefinition definition{
+        "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false};
     OfflineRegionMetadata metadata;
     auto region = db.createRegion(definition, metadata);
     ASSERT_TRUE(region);
@@ -1198,7 +1184,7 @@ TEST(OfflineDatabase, HasRegionResource) {
     OfflineDatabase db(":memory:");
     db.setMaximumAmbientCacheSize(1024 * 100);
 
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, true };
+    OfflineRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, true};
     auto region = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(region);
 
@@ -1224,7 +1210,7 @@ TEST(OfflineDatabase, HasRegionResourceTile) {
     OfflineDatabase db(":memory:");
     db.setMaximumAmbientCacheSize(1024 * 100);
 
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, false };
+    OfflineRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, false};
     auto region = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(region);
 
@@ -1258,7 +1244,7 @@ TEST(OfflineDatabase, HasRegionResourceTile) {
 TEST(OfflineDatabase, OfflineMapboxTileCount) {
     FixtureLog log;
     OfflineDatabase db(":memory:");
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0 , true};
+    OfflineRegionDefinition definition{"http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
     OfflineRegionMetadata metadata;
 
     auto region1 = db.createRegion(definition, metadata);
@@ -1321,7 +1307,7 @@ TEST(OfflineDatabase, BatchInsertion) {
     OfflineDatabase db(":memory:");
     db.setMaximumAmbientCacheSize(1024 * 100);
 
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, true };
+    OfflineRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, true};
     auto region = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(region);
 
@@ -1349,7 +1335,7 @@ TEST(OfflineDatabase, BatchInsertionMapboxTileCountExceeded) {
     db.setOfflineMapboxTileCountLimit(1);
     db.setMaximumAmbientCacheSize(1024 * 100);
 
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, false };
+    OfflineRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, false};
     auto region = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(region);
 
@@ -1600,8 +1586,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DisallowedIO)) {
     EXPECT_EQ(0u, log.uncheckedCount());
 
     // First, create a region object so that we can try deleting it later.
-    OfflineTilePyramidRegionDefinition definition(
-        "mapbox://style", LatLngBounds::hull({ 37.66, -122.57 }, { 37.83, -122.32 }), 0, 8, 2, false);
+    OfflineRegionDefinition definition(
+        "mapbox://style", LatLngBounds::hull({37.66, -122.57}, {37.83, -122.32}), 0, 8, 2, false);
     auto region = db.createRegion(definition, {});
     ASSERT_TRUE(region);
 

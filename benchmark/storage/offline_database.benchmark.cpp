@@ -43,7 +43,7 @@ public:
             db.deleteRegion(std::move(regions[0]));
         }
 
-        OfflineTilePyramidRegionDefinition definition{ "mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
+        OfflineRegionDefinition definition{"mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
         OfflineRegionMetadata metadata{{ 1, 2, 3 }};
 
         auto region = db.createRegion(definition, metadata);

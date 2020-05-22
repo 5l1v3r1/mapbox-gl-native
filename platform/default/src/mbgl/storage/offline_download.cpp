@@ -30,9 +30,7 @@ namespace mbgl {
 using namespace style;
 
 // Generic functions
-
-template <class RegionDefinition>
-Range<uint8_t> coveringZoomRange(const RegionDefinition& definition,
+Range<uint8_t> coveringZoomRange(const OfflineRegionDefinition& definition,
                                  const style::Source& source,
                                  const Range<uint8_t>& zoomRange) {
     double minZ = std::max<double>(source.getCoveringZoomLevel(definition.minZoom), zoomRange.min);
@@ -58,26 +56,24 @@ void tileCover(const OfflineRegionDefinition& definition,
                const style::Source& source,
                const Range<uint8_t>& zoomRange,
                Fn&& fn) {
-    const Range<uint8_t> clampedZoomRange =
-        definition.match([&](auto& reg) { return coveringZoomRange(reg, source, zoomRange); });
+    const Range<uint8_t> clampedZoomRange = coveringZoomRange(definition, source, zoomRange);
 
-    for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
-        definition.match([&](const OfflineTilePyramidRegionDefinition& reg) { tileCover(reg.bounds, z, fn); },
-                         [&](const OfflineGeometryRegionDefinition& reg) { tileCover(reg.geometry, z, fn); });
+    for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; ++z) {
+        definition.location.match([&](const LatLngBounds& bounds) { tileCover(bounds, z, fn); },
+                                  [&](const Geometry<double>& geometry) { tileCover(geometry, z, fn); });
     }
 }
 
 uint64_t tileCount(const OfflineRegionDefinition& definition,
                    const style::Source& source,
                    const Range<uint8_t>& zoomRange) {
-    const Range<uint8_t> clampedZoomRange =
-        definition.match([&](auto& reg) { return coveringZoomRange(reg, source, zoomRange); });
+    const Range<uint8_t> clampedZoomRange = coveringZoomRange(definition, source, zoomRange);
 
     unsigned long result = 0;
-    for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
-        result += definition.match(
-            [&](const OfflineTilePyramidRegionDefinition& reg) { return util::tileCount(reg.bounds, z); },
-            [&](const OfflineGeometryRegionDefinition& reg) { return util::tileCount(reg.geometry, z); });
+    for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; ++z) {
+        result +=
+            definition.location.match([z](const Geometry<double>& geometry) { return util::tileCount(geometry, z); },
+                                      [z](const LatLngBounds& bounds) { return util::tileCount(bounds, z); });
     }
 
     return result;
@@ -131,8 +127,7 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
     }
 
     result->requiredResourceCount++;
-    optional<Response> styleResponse =
-        offlineDatabase.get(Resource::style(definition.match([](auto& reg) { return reg.styleURL; })));
+    optional<Response> styleResponse = offlineDatabase.get(Resource::style(definition.styleURL));
     if (!styleResponse) {
         return *result;
     }
@@ -179,9 +174,8 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
     if (!parser.glyphURL.empty()) {
         result->requiredResourceCount +=
-            parser.fontStacks().size() * (definition.match([](auto& reg) { return reg.includeIdeographs; })
-                                              ? GLYPH_RANGES_PER_FONT_STACK
-                                              : NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK);
+            parser.fontStacks().size() *
+            (definition.includeIdeographs ? GLYPH_RANGES_PER_FONT_STACK : NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK);
     }
 
     if (!parser.spriteURL.empty()) {
@@ -196,7 +190,7 @@ void OfflineDownload::activateDownload() {
     status.downloadState = OfflineRegionDownloadState::Active;
     status.requiredResourceCount++;
 
-    auto styleResource = Resource::style(definition.match([](auto& reg) { return reg.styleURL; }));
+    auto styleResource = Resource::style(definition.styleURL);
     styleResource.setPriority(Resource::Priority::Low);
     styleResource.setUsage(Resource::Usage::Offline);
 
@@ -249,7 +243,7 @@ void OfflineDownload::activateDownload() {
         }
 
         if (!parser.glyphURL.empty()) {
-            const bool includeIdeographs = definition.match([](auto& reg) { return reg.includeIdeographs; });
+            const bool includeIdeographs = definition.includeIdeographs;
             for (const auto& fontStack : parser.fontStacks()) {
                 for (char16_t i = 0; i < GLYPH_RANGES_PER_FONT_STACK; i++) {
                     // Assumes that if a glyph range starts with fixed width/ideographic characters, the entire
@@ -351,12 +345,8 @@ void OfflineDownload::queueTiles(const Source& source, const Tileset& tileset) {
         status.requiredResourceCount++;
         status.requiredTileCount++;
 
-        auto tileResource = Resource::tile(tileset.tiles[0],
-                                           definition.match([](auto& def) { return def.pixelRatio; }),
-                                           tile.x,
-                                           tile.y,
-                                           tile.z,
-                                           tileset.scheme);
+        auto tileResource =
+            Resource::tile(tileset.tiles[0], definition.pixelRatio, tile.x, tile.y, tile.z, tileset.scheme);
 
         tileResource.setPriority(Resource::Priority::Low);
         tileResource.setUsage(Resource::Usage::Offline);

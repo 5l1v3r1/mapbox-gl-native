@@ -68,7 +68,7 @@ public:
     std::size_t size = 0;
 
     auto createRegion() {
-        OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 1.0, true };
+        OfflineRegionDefinition definition{"", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 1.0, true};
         OfflineRegionMetadata metadata;
         return db.createRegion(definition, metadata);
     }
@@ -93,8 +93,9 @@ TEST(OfflineDownload, NoSubresources) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource& resource) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
@@ -134,8 +135,9 @@ TEST(OfflineDownload, InlineSource) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource& resource) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
@@ -176,8 +178,9 @@ TEST(OfflineDownload, GeoJSONSource) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource& resource) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
@@ -212,8 +215,9 @@ TEST(OfflineDownload, Activate) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource& resource) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
@@ -290,10 +294,11 @@ TEST(OfflineDownload, ExcludeIdeographs) {
     auto region = test.createRegion();
     ASSERT_TRUE(region);
     OfflineDownload download(
-                             region->getID(),
-                             OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-                             test.db, test.fileSource);
-    
+        region->getID(),
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
+
     test.fileSource.styleResponse = [&] (const Resource& resource) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
         return test.response("style.json");
@@ -371,8 +376,9 @@ TEST(OfflineDownload, DoesNotFloodTheFileSourceWithRequests) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-        test.db, fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        fileSource);
 
     auto observer = std::make_unique<MockObserver>();
 
@@ -394,8 +400,9 @@ TEST(OfflineDownload, GetStatusNoResources) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
     OfflineRegionStatus status = download.getStatus();
 
     EXPECT_EQ(OfflineRegionDownloadState::Inactive, status.downloadState);
@@ -414,8 +421,9 @@ TEST(OfflineDownload, GetStatusStyleComplete) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     test.db.putRegionResource(1,
         Resource::style("http://127.0.0.1:3000/style.json"),
@@ -439,8 +447,9 @@ TEST(OfflineDownload, GetStatusStyleAndSourceComplete) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     test.db.putRegionResource(1,
         Resource::style("http://127.0.0.1:3000/style.json"),
@@ -468,8 +477,9 @@ TEST(OfflineDownload, RequestError) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource&) {
         Response response;
@@ -497,8 +507,9 @@ TEST(OfflineDownload, RequestErrorsAreRetried) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource&) {
         test.fileSource.styleResponse = [&] (const Resource&) {
@@ -531,8 +542,9 @@ TEST(OfflineDownload, TileCountLimitExceededNoTileResponse) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
 
     uint64_t tileLimit = 0;
 
@@ -574,8 +586,9 @@ TEST(OfflineDownload, TileCountLimitExceededWithTileResponse) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     uint64_t tileLimit = 1;
 
@@ -629,8 +642,9 @@ TEST(OfflineDownload, WithPreviouslyExistingTile) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource& resource) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
@@ -664,8 +678,9 @@ TEST(OfflineDownload, ReactivatePreviouslyCompletedDownload) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource& resource) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
@@ -690,8 +705,9 @@ TEST(OfflineDownload, ReactivatePreviouslyCompletedDownload) {
 
     OfflineDownload redownload(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
 
     std::vector<OfflineRegionStatus> statusesAfterReactivate;
 
@@ -732,8 +748,9 @@ TEST(OfflineDownload, Deactivate) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource& resource) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
@@ -762,8 +779,9 @@ TEST(OfflineDownload, AllOfflineRequestsHaveLowPriorityAndOfflineUsage) {
     ASSERT_TRUE(region);
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource& resource) {
         EXPECT_TRUE(resource.priority == Resource::Priority::Low);
@@ -839,8 +857,9 @@ TEST(OfflineDownload, DiskFull) {
 
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-        test.db, test.fileSource);
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
 
     bool hasRequestedStyle = false;
 
@@ -885,9 +904,10 @@ TEST(OfflineDownload, ResourceOfflineUsageUnset) {
 
     OfflineDownload download(
         region->getID(),
-        OfflineTilePyramidRegionDefinition("http://127.0.0.1:3000/inline_source.style.json",
-                                            LatLngBounds::world(), 0.0, 0.0, 1.0, false),
-        test.db, test.fileSource);
+        OfflineRegionDefinition(
+            "http://127.0.0.1:3000/inline_source.style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, false),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&] (const Resource& resource) {
         EXPECT_TRUE(resource.priority == Resource::Priority::Low);
@@ -950,11 +970,11 @@ TEST(OfflineDownload, InterruptAndResume) {
     OfflineTest test;
     auto region = test.createRegion();
     ASSERT_TRUE(region);
-    OfflineDownload download(region->getID(),
-                             OfflineTilePyramidRegionDefinition(
-                                 "http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-                             test.db,
-                             test.fileSource);
+    OfflineDownload download(
+        region->getID(),
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&](const Resource& resource) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
@@ -1031,11 +1051,11 @@ TEST(OfflineDownload, NoFreezingOnCachedTilesAndNewStyle) {
     OfflineTest test;
     auto region = test.createRegion();
     ASSERT_TRUE(region);
-    OfflineDownload download(region->getID(),
-                             OfflineTilePyramidRegionDefinition(
-                                 "http://127.0.0.1:3000/style.json", LatLngBounds::world(), 1.0, 1.0, 1.0, true),
-                             test.db,
-                             test.fileSource);
+    OfflineDownload download(
+        region->getID(),
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 1.0, 1.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     test.fileSource.setProperty(MAX_CONCURRENT_REQUESTS_KEY, 2u);
     test.fileSource.styleResponse = [&](const Resource&) { return test.response("inline_source.style.json"); };
@@ -1067,11 +1087,11 @@ TEST(OfflineDownload, NoFreezingOnNotFoundError) {
     OfflineTest test;
     auto region = test.createRegion();
     ASSERT_TRUE(region);
-    OfflineDownload download(region->getID(),
-                             OfflineTilePyramidRegionDefinition(
-                                 "http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
-                             test.db,
-                             test.fileSource);
+    OfflineDownload download(
+        region->getID(),
+        OfflineRegionDefinition("http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+        test.db,
+        test.fileSource);
 
     test.fileSource.styleResponse = [&](const Resource& resource) {
         EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);

@@ -17,7 +17,7 @@ namespace mbgl {
 class TileID;
 
 /*
- * An offline region defined by a style URL, geographic bounding box, zoom range, and
+ * An offline region defined by a style URL, geographic bounding box or geometry, zoom range, and
  * device pixel ratio.
  *
  * Both minZoom and maxZoom must be ≥ 0, and maxZoom must be ≥ minZoom.
@@ -27,47 +27,40 @@ class TileID;
  *
  * pixelRatio must be ≥ 0 and should typically be 1.0 or 2.0.
  */
-class OfflineTilePyramidRegionDefinition {
+class OfflineRegionDefinition {
 public:
-    OfflineTilePyramidRegionDefinition(std::string, LatLngBounds, double, double, float, bool);
+    OfflineRegionDefinition(std::string styleURL_,
+                            LatLngBounds bounds_,
+                            double minZoom_,
+                            double maxZoom_,
+                            float pixelRatio_,
+                            bool includeIdeographs_)
+        : OfflineRegionDefinition(std::move(styleURL_), minZoom_, maxZoom_, pixelRatio_, includeIdeographs_) {
+        location = std::move(bounds_);
+    }
+    OfflineRegionDefinition(std::string styleURL_,
+                            Geometry<double> geometry_,
+                            double minZoom_,
+                            double maxZoom_,
+                            float pixelRatio_,
+                            bool includeIdeographs_)
+        : OfflineRegionDefinition(std::move(styleURL_), minZoom_, maxZoom_, pixelRatio_, includeIdeographs_) {
+        location = std::move(geometry_);
+    }
 
     /* Private */
     std::string styleURL;
-    LatLngBounds bounds;
     double minZoom;
     double maxZoom;
     float pixelRatio;
     bool includeIdeographs;
+    variant<LatLngBounds, Geometry<double>> location;
+
+    bool isGeometryDefined() const { return location.is<Geometry<double>>(); }
+
+private:
+    OfflineRegionDefinition(std::string, double, double, float, bool);
 };
-
-/*
- * An offline region defined by a style URL, geometry, zoom range, and
- * device pixel ratio.
- *
- * Both minZoom and maxZoom must be ≥ 0, and maxZoom must be ≥ minZoom.
- *
- * maxZoom may be ∞, in which case for each tile source, the region will include
- * tiles from minZoom up to the maximum zoom level provided by that source.
- *
- * pixelRatio must be ≥ 0 and should typically be 1.0 or 2.0.
- */
-class OfflineGeometryRegionDefinition {
-public:
-    OfflineGeometryRegionDefinition(std::string styleURL, Geometry<double>, double minZoom, double maxZoom, float pixelRatio, bool includeIdeographs);
-
-    /* Private */
-    std::string styleURL;
-    Geometry<double> geometry;
-    double minZoom;
-    double maxZoom;
-    float pixelRatio;
-    bool includeIdeographs;
-};
-
-/*
- * The offline region definition types supported
- */
-using OfflineRegionDefinition = variant<OfflineTilePyramidRegionDefinition, OfflineGeometryRegionDefinition>;
 
 /*
  * The encoded format is private.
