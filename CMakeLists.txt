@@ -1060,11 +1060,16 @@ if(MBGL_WITH_PLATFORM_EXTRAS)
     include(${MBGL_WITH_PLATFORM_EXTRAS})
 endif()
 
+include(${PROJECT_SOURCE_DIR}/scripts/license.cmake)
+
 if(MBGL_WITH_CORE_ONLY)
     return()
 endif()
 
-include(${PROJECT_SOURCE_DIR}/scripts/license.cmake)
+if(NOT EXISTS ${PROJECT_SOURCE_DIR}/internal/internal.cmake)
+    set(MBGL_PUBLIC_BUILD TRUE)
+    mbgl_generate_license(mbgl-core ${PROJECT_SOURCE_DIR})
+endif()
 
 if(MBGL_WITH_QT)
     include(${PROJECT_SOURCE_DIR}/platform/qt/qt.cmake)

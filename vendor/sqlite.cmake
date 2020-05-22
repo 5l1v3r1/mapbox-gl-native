@@ -27,3 +27,12 @@ target_include_directories(
     mbgl-vendor-sqlite SYSTEM
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}/sqlite/include
 )
+
+set_target_properties(
+    mbgl-vendor-sqlite
+    PROPERTIES
+        INTERFACE_MAPBOX_NAME "sqlite"
+        INTERFACE_MAPBOX_URL "https://sqlite.org/index.html"
+        INTERFACE_MAPBOX_AUTHOR "Unicode, Inc"
+        INTERFACE_MAPBOX_LICENSE ${CMAKE_CURRENT_LIST_DIR}/sqlite/LICENSE.md
+)

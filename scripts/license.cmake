@@ -1,8 +1,11 @@
-# Generate the license file for the target ${param} at config time
+# Generate the license file for the target ${param} at config time and write it to ${output_dir} on the `license` target.
 
-function(mbgl_generate_license param)
-    # Fake targets or non relevant.
-    set(BLACKLIST "mbgl-compiler-options")
+function(mbgl_generate_license param output_dir)
+    # Fake targets or system dependencies.
+    list(APPEND BLACKLIST "mbgl-compiler-options")
+    list(APPEND BLACKLIST "OpenGL::GL")
+    list(APPEND BLACKLIST "OpenGL::GLX")
+    list(APPEND BLACKLIST "PNG::PNG")
 
     get_target_property(LIBRARIES ${param} LINK_LIBRARIES)
     list(INSERT LIBRARIES 0 ${param})
@@ -32,9 +35,16 @@ function(mbgl_generate_license param)
         endif()
     endforeach()
 
-    file(WRITE ${CMAKE_BINARY_DIR}/${param}.license ${LICENSE_LIST})
+    set(LICENSE_FILE LICENSE-${CMAKE_SYSTEM_NAME}.md)
+    file(WRITE ${CMAKE_BINARY_DIR}/${LICENSE_FILE} ${LICENSE_LIST})
 
-    add_custom_target(${param}-license COMMAND cat ${CMAKE_BINARY_DIR}/${param}.license)
+    add_custom_target(
+        license
+        COMMAND
+            ${CMAKE_COMMAND}
+            -E
+            copy
+            ${CMAKE_BINARY_DIR}/${LICENSE_FILE}
+            ${output_dir}/${LICENSE_FILE}
+    )
 endfunction()
-
-mbgl_generate_license(mbgl-core)

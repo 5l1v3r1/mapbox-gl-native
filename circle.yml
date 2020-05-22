@@ -412,7 +412,7 @@ jobs:
       - run:
           name: Code Generators
           command: |
-            cp build/mbgl-core.license LICENSE.mbgl-core.md
+            cmake --build build --target license
             platform/default/include/mbgl/storage/offline_schema.js
             scripts/generate-shaders.js
             scripts/generate-style-code.js

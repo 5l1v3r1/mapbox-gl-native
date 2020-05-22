@@ -24,3 +24,12 @@ target_include_directories(
     mbgl-vendor-nunicode SYSTEM
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}/nunicode/include
 )
+
+set_target_properties(
+    mbgl-vendor-nunicode
+    PROPERTIES
+        INTERFACE_MAPBOX_NAME "libnu"
+        INTERFACE_MAPBOX_URL "https://bitbucket.org/alekseyt/nunicode"
+        INTERFACE_MAPBOX_AUTHOR "Aleksey Tulinov"
+        INTERFACE_MAPBOX_LICENSE ${CMAKE_CURRENT_LIST_DIR}/nunicode/LICENSE
+)

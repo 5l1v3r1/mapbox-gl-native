@@ -41,3 +41,12 @@ target_include_directories(
 )
 
 set_property(TARGET mbgl-vendor-icu PROPERTY FOLDER Core)
+
+set_target_properties(
+    mbgl-vendor-icu
+    PROPERTIES
+        INTERFACE_MAPBOX_NAME "icu"
+        INTERFACE_MAPBOX_URL "https://github.com/unicode-org/icu"
+        INTERFACE_MAPBOX_AUTHOR "Unicode, Inc"
+        INTERFACE_MAPBOX_LICENSE ${CMAKE_CURRENT_LIST_DIR}/icu/LICENSE
+)
