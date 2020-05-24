@@ -239,7 +239,16 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
                          collisionGroups.get(params.sourceId),
                          getAvoidEdges(symbolBucket, renderTile.matrix)};
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
-        if (seenCrossTileIDs.count(symbol.crossTileID) != 0u) continue;
+        if (seenCrossTileIDs.count(symbol.crossTileID) != 0u ||
+            symbol.crossTileID == SymbolInstance::invalidCrossTileID())
+            continue;
+        if (ctx.getRenderTile().holdForFade()) {
+            const JointPlacement kUnplaced(false, false, false);
+            // Mark all symbols from this tile as "not placed", but don't add to seenCrossTileIDs, because we don't
+            // know yet if we have a duplicate in a parent tile that _should_ be placed.
+            placements.emplace(symbol.crossTileID, kUnplaced);
+            continue;
+        }
         placeSymbol(symbol, ctx);
         seenCrossTileIDs.insert(symbol.crossTileID);
     }
@@ -253,14 +262,7 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
 }
 
 JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, const PlacementContext& ctx) {
-    static const JointPlacement kUnplaced(false, false, false);
-    if (symbolInstance.crossTileID == SymbolInstance::invalidCrossTileID()) return kUnplaced;
-
-    if (ctx.getRenderTile().holdForFade()) {
-        // Mark all symbols from this tile as "not placed", but don't add to seenCrossTileIDs, because we don't
-        // know yet if we have a duplicate in a parent tile that _should_ be placed.
-        return kUnplaced;
-    }
+    assert(symbolInstance.crossTileID != SymbolInstance::invalidCrossTileID());
     const SymbolBucket& bucket = ctx.getBucket();
     const mat4& posMatrix = ctx.getRenderTile().matrix;
     const auto& collisionGroup = ctx.collisionGroup;
