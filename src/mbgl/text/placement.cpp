@@ -12,32 +12,6 @@
 
 namespace mbgl {
 
-OpacityState::OpacityState(bool placed_, bool skipFade)
-    : opacity((skipFade && placed_) ? 1 : 0)
-    , placed(placed_)
-{
-}
-
-OpacityState::OpacityState(const OpacityState& prevState, float increment, bool placed_) :
-    opacity(::fmax(0, ::fmin(1, prevState.opacity + (prevState.placed ? increment : -increment)))),
-    placed(placed_) {}
-
-bool OpacityState::isHidden() const {
-    return opacity == 0 && !placed;
-}
-
-JointOpacityState::JointOpacityState(bool placedText, bool placedIcon, bool skipFade) :
-    icon(OpacityState(placedIcon, skipFade)),
-    text(OpacityState(placedText, skipFade)) {}
-
-JointOpacityState::JointOpacityState(const JointOpacityState& prevOpacityState, float increment, bool placedText, bool placedIcon) :
-    icon(OpacityState(prevOpacityState.icon, increment, placedIcon)),
-    text(OpacityState(prevOpacityState.text, increment, placedText)) {}
-
-bool JointOpacityState::isHidden() const {
-    return icon.isHidden() && text.isHidden();
-}
-    
 const CollisionGroups::CollisionGroup& CollisionGroups::get(const std::string& sourceID) {
     // The predicate/groupID mechanism allows for arbitrary grouping,
     // but the current interface defines one source == one group when
@@ -1224,6 +1198,13 @@ bool Placement::recordSymbolPlacement(const SymbolInstance& symbol,
         assert(box.isBox());
         iconCollisionBox = box.box();
     }
+    optional<JointOpacityState> prevOpacity;
+    if (getPrevPlacement()) {
+        auto it = getPrevPlacement()->opacities.find(symbol.crossTileID);
+        if (it != getPrevPlacement()->opacities.end()) {
+            prevOpacity = it->second;
+        }
+    }
     PlacedSymbolData symbolData{symbol.key,
                                 textCollisionBox,
                                 iconCollisionBox,
@@ -1231,7 +1212,8 @@ bool Placement::recordSymbolPlacement(const SymbolInstance& symbol,
                                 placement.icon,
                                 nullopt,
                                 collisionIndex.getViewportPadding(),
-                                ctx.getBucket().bucketLeaderID};
+                                ctx.getBucket().bucketLeaderID,
+                                prevOpacity};
     placedSymbolsData.emplace_back(std::move(symbolData));
     return true;
 }
@@ -1239,7 +1221,7 @@ bool Placement::recordSymbolPlacement(const SymbolInstance& symbol,
 const CollisionIndex& Placement::getCollisionIndex() const {
     return collisionIndex;
 }
-    
+
 const RetainedQueryData& Placement::getQueryData(uint32_t bucketInstanceId) const {
     auto it = retainedQueryData.find(bucketInstanceId);
     if (it == retainedQueryData.end()) {

@@ -246,6 +246,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/raster_dem_source_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/raster_source_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/sourcemanager/vector_source_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/text/placement_types.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/source_manager.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/annotation_source_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sourcemanager/custom_geometry_source_factory.cpp
@@ -751,6 +752,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/local_glyph_rasterizer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/placement.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/placement.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/text/placement_types.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/quads.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/quads.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/shaping.cpp

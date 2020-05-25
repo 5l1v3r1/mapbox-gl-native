@@ -1,7 +1,8 @@
 #pragma once
 
-#include <mbgl/renderer/query.hpp>
 #include <mbgl/annotation/annotation.hpp>
+#include <mbgl/renderer/query.hpp>
+#include <mbgl/text/placement_types.hpp>
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/geojson.hpp>
 
@@ -20,26 +21,6 @@ class UpdateParameters;
 namespace gfx {
 class RendererBackend;
 } // namespace gfx
-
-struct PlacedSymbolData {
-    // Contents of the label
-    std::u16string key;
-    // If symbol contains text, text collision box in viewport coordinates
-    optional<mapbox::geometry::box<float>> textCollisionBox;
-    // If symbol contains icon, icon collision box in viewport coordinates
-    optional<mapbox::geometry::box<float>> iconCollisionBox;
-    // Symbol text was placed
-    bool textPlaced;
-    // Symbol icon was placed
-    bool iconPlaced;
-    // Symbol text or icon collision box intersects tile borders
-    // (initialized only in tile mode)
-    optional<bool> intersectsTileBorder;
-    // Viewport padding ({viewportPadding, viewportPadding} is a coordinate of the tile's top-left corner)
-    float viewportPadding;
-    // Layer id (leader of the symbol layout group)
-    std::string layer;
-};
 
 class Renderer {
 public:

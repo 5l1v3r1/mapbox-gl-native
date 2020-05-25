@@ -4,6 +4,7 @@
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/style/transition_options.hpp>
 #include <mbgl/text/collision_index.hpp>
+#include <mbgl/text/placement_types.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <string>
 #include <unordered_map>
@@ -17,51 +18,6 @@ using SymbolInstanceReferences = std::vector<std::reference_wrapper<const Symbol
 class UpdateParameters;
 enum class PlacedSymbolOrientation : bool;
 
-class OpacityState {
-public:
-    OpacityState(bool placed, bool skipFade);
-    OpacityState(const OpacityState& prevState, float increment, bool placed);
-    bool isHidden() const;
-    float opacity;
-    bool placed;
-};
-
-class JointOpacityState {
-public:
-    JointOpacityState(bool placedText, bool placedIcon, bool skipFade);
-    JointOpacityState(const JointOpacityState& prevOpacityState, float increment, bool placedText, bool placedIcon);
-    bool isHidden() const;
-    OpacityState icon;
-    OpacityState text;
-};
-
-class VariableOffset {
-public:
-    std::array<float, 2> offset;
-    float width;
-    float height;
-    style::TextVariableAnchorType anchor;
-    float textBoxScale;
-    optional<style::TextVariableAnchorType> prevAnchor;
-};
-
-class JointPlacement {
-public:
-    JointPlacement(bool text_, bool icon_, bool skipFade_)
-        : text(text_), icon(icon_), skipFade(skipFade_)
-    {}
-
-    bool placed() const { return text || icon; }
-
-    const bool text;
-    const bool icon;
-    // skipFade = outside viewport, but within CollisionIndex::viewportPadding px of the edge
-    // Because these symbols aren't onscreen yet, we can skip the "fade in" animation,
-    // and if a subsequent viewport change brings them into view, they'll be fully
-    // visible right away.
-    const bool skipFade;
-};
-  
 struct RetainedQueryData {
     uint32_t bucketInstanceId;
     std::shared_ptr<FeatureIndex> featureIndex;
