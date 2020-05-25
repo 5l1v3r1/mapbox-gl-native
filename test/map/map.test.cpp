@@ -1659,3 +1659,82 @@ TEST(Map, VolatileSource) {
     test.runLoop.run();
     EXPECT_EQ(8, requestedTiles);
 }
+
+namespace {
+
+bool symbolHasFadedOut(const JointOpacityState& opacity) {
+    return (opacity.text.placed && opacity.text.opacity == 0.0f) ||
+           (opacity.icon.placed && opacity.icon.opacity == 0.0f);
+}
+
+} // namespace
+
+TEST(Map, SymbolFlickeringOnZoom) {
+    MapTest<> test{std::move(MapOptions().withMapMode(MapMode::Continuous))};
+    test.fileSource->spriteJSONResponse = makeResponse("sprite.json");
+    test.fileSource->spriteImageResponse = makeResponse("sprite.png");
+
+    test.frontend.getRenderer()->collectPlacedSymbolData(true);
+    test.map.getStyle().loadJSON(R"STYLE(
+{
+  "version": 8,
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "Point",
+        "coordinates": [
+          -77.037603,
+          38.917982
+        ]
+      }
+    }
+  },
+  "sprite": "local://sprites/sprite",
+  "layers": [
+    {
+      "id": "symbol",
+      "type": "symbol",
+      "source": "geojson",
+      "layout": {
+        "icon-image": "star-11"
+      }
+    }
+  ]
+}
+)STYLE");
+    test.frontend.getRenderer()->collectPlacedSymbolData(true);
+    test.observer.didFinishRenderingFrameCallback = [&](const auto& status) {
+        if (!status.needsRepaint) test.runLoop.stop();
+    };
+    const LatLng symbolLocation{38.917982, -77.037603};
+
+    test.map.jumpTo(CameraOptions().withZoom(12).withCenter(symbolLocation));
+    test.runLoop.run();
+
+    test.map.jumpTo(CameraOptions().withZoom(14).withCenter(symbolLocation));
+    test.runLoop.run();
+
+    bool flickeringChecked = false;
+    test.observer.didFinishRenderingFrameCallback = [&test, &flickeringChecked](const auto& status) {
+        if (!status.needsRepaint) test.runLoop.stop();
+        const auto& placedSymbols = test.frontend.getRenderer()->getPlacedSymbolsData();
+        if (placedSymbols.empty()) return; // Data reset at every render() call.
+        EXPECT_EQ(1u, placedSymbols.size());
+        const auto& placedSymbol = placedSymbols.front();
+        EXPECT_FALSE(placedSymbol.textPlaced || placedSymbol.textCollisionBox);
+        EXPECT_TRUE(placedSymbol.iconPlaced && placedSymbol.iconCollisionBox);
+        EXPECT_EQ("symbol", placedSymbol.layer);
+        if (placedSymbol.prevOpacity) {
+            // Make sure we're not placing already faded symbol,
+            // so that symbol flickering on zoom is avoided.
+            EXPECT_FALSE(symbolHasFadedOut(*placedSymbol.prevOpacity));
+            flickeringChecked = true;
+        }
+    };
+    // Zoom `14` tiles are fading.
+    test.map.jumpTo(CameraOptions().withZoom(12).withCenter(symbolLocation));
+
+    test.runLoop.run();
+    EXPECT_TRUE(flickeringChecked);
+}
