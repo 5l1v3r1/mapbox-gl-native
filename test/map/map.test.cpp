@@ -1556,7 +1556,7 @@ bool isInsideTile(const mapbox::geometry::box<float>& box, float padding, Size v
 
 } // namespace
 
-TEST(Map, PlacedSymbolData) {
+TEST(Map, PlacedSymbolDataTileMode) {
     MapTest<> test{std::move(MapOptions().withMapMode(MapMode::Tile))};
 
     test.fileSource->tileResponse = makeResponse("vector.tile", true);
@@ -1598,14 +1598,16 @@ TEST(Map, PlacedSymbolData) {
         EXPECT_NE(0u, symbolLayers.count(placedSymbol.layer));
         if (placedSymbol.textPlaced && placedSymbol.textCollisionBox) {
             if (isInsideTile(*placedSymbol.textCollisionBox, placedSymbol.viewportPadding, viewportSize)) {
-                EXPECT_FALSE(placedSymbol.intersectsTileBorder);
+                ASSERT_TRUE(placedSymbol.intersectsTileBorder);
+                EXPECT_FALSE(*placedSymbol.intersectsTileBorder);
                 ++placedTextInsideTile;
             }
             ++placedText;
         }
         if (placedSymbol.iconPlaced && placedSymbol.iconCollisionBox) {
             if (isInsideTile(*placedSymbol.iconCollisionBox, placedSymbol.viewportPadding, viewportSize)) {
-                EXPECT_FALSE(placedSymbol.intersectsTileBorder);
+                ASSERT_TRUE(placedSymbol.intersectsTileBorder);
+                EXPECT_FALSE(*placedSymbol.intersectsTileBorder);
                 ++placedIconInsideTile;
             }
             ++placedIcon;

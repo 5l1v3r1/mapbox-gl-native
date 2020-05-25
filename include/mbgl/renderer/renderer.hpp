@@ -33,7 +33,8 @@ struct PlacedSymbolData {
     // Symbol icon was placed
     bool iconPlaced;
     // Symbol text or icon collision box intersects tile borders
-    bool intersectsTileBorder;
+    // (initialized only in tile mode)
+    optional<bool> intersectsTileBorder;
     // Viewport padding ({viewportPadding, viewportPadding} is a coordinate of the tile's top-left corner)
     float viewportPadding;
     // Layer id (leader of the symbol layout group)
@@ -84,7 +85,7 @@ public:
     void dumpDebugLogs();
 
     /**
-     * @brief In Tile map mode, enables or disables collecting of the placed symbols data,
+     * @brief Enables or disables collecting of the placed symbols data,
      * which can be obtained with `getPlacedSymbolsData()`.
      *
      * The placed symbols data collecting is disabled by default.

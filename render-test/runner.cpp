@@ -832,7 +832,7 @@ void TestRunner::run(TestMetadata& metadata) {
                 };
 
             for (const auto& placedSymbol : placedSymbols) {
-                if (placedSymbol.intersectsTileBorder) {
+                if (placedSymbol.intersectsTileBorder && *placedSymbol.intersectsTileBorder) {
                     if (placedSymbol.textCollisionBox) {
                         findCutOffs(
                             placedSymbol, *placedSymbol.textCollisionBox, placedSymbol.textPlaced, false /*isIcon*/);

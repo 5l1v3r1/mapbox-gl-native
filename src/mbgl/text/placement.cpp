@@ -606,7 +606,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     JointPlacement result(
         placeText || ctx.alwaysShowText, placeIcon || ctx.alwaysShowIcon, offscreen || bucket.justReloaded);
     placements.emplace(symbolInstance.crossTileID, result);
-    newSymbolPlaced(symbolInstance, ctx, result, ctx.placementType, textBoxes, iconBoxes);
+    recordSymbolPlacement(symbolInstance, ctx, result, ctx.placementType, textBoxes, iconBoxes);
     return result;
 }
 
@@ -1199,8 +1199,41 @@ bool Placement::hasTransitions(TimePoint now) const {
 }
 
 const std::vector<PlacedSymbolData>& Placement::getPlacedSymbolsData() const {
-    const static std::vector<PlacedSymbolData> data;
-    return data;
+    return placedSymbolsData;
+}
+
+bool Placement::recordSymbolPlacement(const SymbolInstance& symbol,
+                                      const PlacementContext& ctx,
+                                      const JointPlacement& placement,
+                                      style::SymbolPlacementType placementType,
+                                      const std::vector<ProjectedCollisionBox>& textCollisionBoxes,
+                                      const std::vector<ProjectedCollisionBox>& iconCollisionBoxes) {
+    if (!collectData || placementType != style::SymbolPlacementType::Point) return false;
+
+    optional<mapbox::geometry::box<float>> textCollisionBox;
+    if (!textCollisionBoxes.empty()) {
+        assert(textCollisionBoxes.size() == 1u);
+        auto& box = textCollisionBoxes.front();
+        assert(box.isBox());
+        textCollisionBox = box.box();
+    }
+    optional<mapbox::geometry::box<float>> iconCollisionBox;
+    if (!iconCollisionBoxes.empty()) {
+        assert(iconCollisionBoxes.size() == 1u);
+        auto& box = iconCollisionBoxes.front();
+        assert(box.isBox());
+        iconCollisionBox = box.box();
+    }
+    PlacedSymbolData symbolData{symbol.key,
+                                textCollisionBox,
+                                iconCollisionBox,
+                                placement.text,
+                                placement.icon,
+                                nullopt,
+                                collisionIndex.getViewportPadding(),
+                                ctx.getBucket().bucketLeaderID};
+    placedSymbolsData.emplace_back(std::move(symbolData));
+    return true;
 }
 
 const CollisionIndex& Placement::getCollisionIndex() const {
@@ -1256,8 +1289,6 @@ public:
 private:
     void placeLayers(const RenderLayerReferences&) override;
     void placeSymbolBucket(const BucketPlacementData&, std::set<uint32_t>&) override;
-    void collectPlacedSymbolData(bool enable) override { collectData = enable; }
-    const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const override { return placedSymbolsData; }
 
     optional<CollisionBoundaries> getAvoidEdges(const SymbolBucket&, const mat4&) override;
     bool canPlaceAtVariableAnchor(const CollisionBox& box,
@@ -1266,23 +1297,21 @@ private:
                                   std::vector<style::TextVariableAnchorType>& anchors,
                                   const mat4& posMatrix,
                                   float textPixelRatio) override;
-    void newSymbolPlaced(const SymbolInstance&,
-                         const PlacementContext&,
-                         const JointPlacement&,
-                         style::SymbolPlacementType,
-                         const std::vector<ProjectedCollisionBox>&,
-                         const std::vector<ProjectedCollisionBox>&) override;
+    bool recordSymbolPlacement(const SymbolInstance&,
+                               const PlacementContext&,
+                               const JointPlacement&,
+                               style::SymbolPlacementType,
+                               const std::vector<ProjectedCollisionBox>&,
+                               const std::vector<ProjectedCollisionBox>&) override;
 
     bool shouldRetryPlacement(const JointPlacement&, const PlacementContext&);
 
     std::unordered_map<uint32_t, bool> locationCache;
     optional<CollisionBoundaries> tileBorders;
     std::set<uint32_t> seenCrossTileIDs;
-    std::vector<PlacedSymbolData> placedSymbolsData;
     std::vector<Intersection> intersections;
     bool populateIntersections = false;
     std::size_t currentIntersectionPriority{};
-    bool collectData = false;
 };
 
 void TilePlacement::placeLayers(const RenderLayerReferences& layers) {
@@ -1496,38 +1525,22 @@ bool TilePlacement::canPlaceAtVariableAnchor(const CollisionBox& box,
     return (status.flags == IntersectStatus::None);
 }
 
-void TilePlacement::newSymbolPlaced(const SymbolInstance& symbol,
-                                    const PlacementContext& ctx,
-                                    const JointPlacement& placement,
-                                    style::SymbolPlacementType placementType,
-                                    const std::vector<ProjectedCollisionBox>& textCollisionBoxes,
-                                    const std::vector<ProjectedCollisionBox>& iconCollisionBoxes) {
-    if (!collectData || placementType != style::SymbolPlacementType::Point || shouldRetryPlacement(placement, ctx))
-        return;
-
-    optional<mapbox::geometry::box<float>> textCollisionBox;
-    if (!textCollisionBoxes.empty()) {
-        assert(textCollisionBoxes.size() == 1u);
-        auto& box = textCollisionBoxes.front();
-        assert(box.isBox());
-        textCollisionBox = box.box();
+bool TilePlacement::recordSymbolPlacement(const SymbolInstance& symbol,
+                                          const PlacementContext& ctx,
+                                          const JointPlacement& placement,
+                                          style::SymbolPlacementType placementType,
+                                          const std::vector<ProjectedCollisionBox>& textCollisionBoxes,
+                                          const std::vector<ProjectedCollisionBox>& iconCollisionBoxes) {
+    if (shouldRetryPlacement(placement, ctx) ||
+        !Placement::recordSymbolPlacement(
+            symbol, ctx, placement, placementType, textCollisionBoxes, iconCollisionBoxes)) {
+        return false;
     }
-    optional<mapbox::geometry::box<float>> iconCollisionBox;
-    if (!iconCollisionBoxes.empty()) {
-        assert(iconCollisionBoxes.size() == 1u);
-        auto& box = iconCollisionBoxes.front();
-        assert(box.isBox());
-        iconCollisionBox = box.box();
-    }
-    PlacedSymbolData symbolData{symbol.key,
-                                textCollisionBox,
-                                iconCollisionBox,
-                                placement.text,
-                                placement.icon,
-                                !placement.skipFade && populateIntersections,
-                                collisionIndex.getViewportPadding(),
-                                ctx.getBucket().bucketLeaderID};
-    placedSymbolsData.emplace_back(std::move(symbolData));
+    assert(!placedSymbolsData.empty());
+    auto& addedData = placedSymbolsData.back();
+    assert(!addedData.intersectsTileBorder);
+    addedData.intersectsTileBorder = !placement.skipFade && populateIntersections;
+    return true;
 }
 
 bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const PlacementContext& ctx) {

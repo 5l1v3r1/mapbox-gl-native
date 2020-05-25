@@ -123,8 +123,8 @@ public:
     virtual float symbolFadeChange(TimePoint now) const;
     virtual bool hasTransitions(TimePoint now) const;
     virtual bool transitionsEnabled() const;
-    virtual void collectPlacedSymbolData(bool /*enable*/) {}
-    virtual const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
+    void collectPlacedSymbolData(bool enable) { collectData = enable; }
+    const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
 
     const CollisionIndex& getCollisionIndex() const;
     TimePoint getCommitTime() const { return commitTime; }
@@ -145,12 +145,13 @@ protected:
     JointPlacement placeSymbol(const SymbolInstance& symbolInstance, const PlacementContext&);
     void placeLayer(const RenderLayer&, std::set<uint32_t>&);
     virtual void commit();
-    virtual void newSymbolPlaced(const SymbolInstance&,
-                                 const PlacementContext&,
-                                 const JointPlacement&,
-                                 style::SymbolPlacementType,
-                                 const std::vector<ProjectedCollisionBox>& /*textBoxes*/,
-                                 const std::vector<ProjectedCollisionBox>& /*iconBoxes*/) {}
+    // Returns `true` if data was recorded, otherwise returns `false`.
+    virtual bool recordSymbolPlacement(const SymbolInstance&,
+                                       const PlacementContext&,
+                                       const JointPlacement&,
+                                       style::SymbolPlacementType,
+                                       const std::vector<ProjectedCollisionBox>& textBoxes,
+                                       const std::vector<ProjectedCollisionBox>& iconBoxes);
     // Implentation specific hooks, which get called during a symbol bucket placement.
     virtual optional<CollisionBoundaries> getAvoidEdges(const SymbolBucket&, const mat4& /*posMatrix*/) {
         return nullopt;
@@ -195,6 +196,8 @@ protected:
     CollisionGroups collisionGroups;
     mutable optional<Immutable<Placement>> prevPlacement;
     bool showCollisionBoxes = false;
+    std::vector<PlacedSymbolData> placedSymbolsData;
+    bool collectData = false;
 
     // Cache being used by placeSymbol()
     std::vector<ProjectedCollisionBox> textBoxes;
