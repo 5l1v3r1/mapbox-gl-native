@@ -88,7 +88,7 @@ public:
     Layer(const Layer& ) = delete;
     Layer& operator=(const Layer&) = delete;
 
-    virtual ~Layer();
+    ~Layer() override;
 
     std::string getID() const;
     // Source

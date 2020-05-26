@@ -36,7 +36,7 @@ public:
                             float pixelRatio_,
                             bool includeIdeographs_)
         : OfflineRegionDefinition(std::move(styleURL_), minZoom_, maxZoom_, pixelRatio_, includeIdeographs_) {
-        location = std::move(bounds_);
+        location = bounds_;
     }
     OfflineRegionDefinition(std::string styleURL_,
                             Geometry<double> geometry_,

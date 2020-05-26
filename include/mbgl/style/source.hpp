@@ -75,7 +75,7 @@ public:
     Source(const Source&) = delete;
     Source& operator=(const Source&) = delete;
 
-    virtual ~Source();
+    ~Source() override;
 
     std::string getID() const;
     optional<std::string> getAttribution() const;
@@ -93,6 +93,7 @@ public:
 
     virtual void loadDescription(FileSource&) = 0;
 
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
     virtual void setSourceData(SourceData) {}
 
     /**
@@ -118,6 +119,8 @@ public:
      * @return const GeoJSONData*
      */
     virtual const GeoJSONData* getGeoJSONData() const { return nullptr; }
+
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
     virtual void setSourceParameters(SourceParameters) {}
 
     virtual void invalidateTile(const CanonicalTileID&) {}

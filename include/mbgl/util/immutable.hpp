@@ -45,8 +45,9 @@ private:
     template <class S, class... Args> friend Mutable<S> makeMutable(Args&&...);
     // NOLINTNEXTLINE(readability-redundant-declaration)
     template <class S, class U> friend Mutable<S> staticMutableCast(const Mutable<U>&);
-    // NOLINTNEXTLINE(readability-redundant-declaration)
+
     template <class S, class U>
+    // NOLINTNEXTLINE(readability-redundant-declaration)
     friend Mutable<S> constImmutableCast(const Immutable<U>&);
 };
 
@@ -118,6 +119,7 @@ private:
     template <class S, class U> friend Immutable<S> staticImmutableCast(const Immutable<U>&);
 
     template <class S, class U>
+    // NOLINTNEXTLINE(readability-redundant-declaration)
     friend Mutable<S> constImmutableCast(const Immutable<U>&);
 };
 

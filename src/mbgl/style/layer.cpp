@@ -169,7 +169,7 @@ Value Layer::serialize() const {
     mapbox::base::ValueObject result;
     result.emplace(std::make_pair("id", getID()));
     for (const auto& pair : layerProperties) {
-        Property property = static_cast<Property>(pair.second);
+        auto property = static_cast<Property>(pair.second);
         std::string key = pair.first.c_str();
         auto styleProperty = getLayerProperty(this, property);
         if (styleProperty != getLayerPropertyDefaultValue(property)) {

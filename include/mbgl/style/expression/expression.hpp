@@ -176,8 +176,8 @@ enum class Kind : int32_t {
 class Expression : public Serializable {
 public:
     Expression(Kind kind_, type::Type type_) : kind(kind_), type(std::move(type_)) {}
-    virtual ~Expression() = default;
-    
+    ~Expression() override = default;
+
     virtual EvaluationResult evaluate(const EvaluationContext& params) const = 0;
     virtual void eachChild(const std::function<void(const Expression&)>&) const = 0;
     virtual bool operator==(const Expression&) const = 0;
